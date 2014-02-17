@@ -74,10 +74,58 @@ EDX_CONF = {
     'EVT_VIDEO_VOLUME_MUTE': [],
 }
 
+
+"""
+OnDemandKorea data format
+"""
+ODK_CONF = {
+    ### properties ###
+    # Does the video autoplay?
+    'AUTOPLAY_VIDEOS': True,
+    # Where is this video hosted?
+    'VIDEO_HOST': 'youtube',
+    # Where is the absolute timestamp of an event stored?
+    'TIMESTAMP': 'time',
+    # Where is the event type information stored?
+    'TYPE_EVENT': 'event',
+    # Where is the username stored?
+    'USERNAME': 'uid',
+    # Where is the video ID stored?
+    'VIDEO_ID': 'post_id',
+    # Where is the video name stored?
+    'VIDEO_NAME': 'post_id',
+    # Where is the relative video timestamp stored?
+    'VIDEO_TIME': 'pos',
+    # Where is the play speed stored?
+    'VIDEO_SPEED': [],
+
+    ### events ###
+    # Where is the page open event?
+    'EVT_PAGE_OPEN': ['onReady'],
+    # Where is the page close event?
+    'EVT_PAGE_CLOSE': [],
+    # Where is the next destination event?
+    'EVT_NEXT_DST': [],
+    # Where is the player pause event?
+    'EVT_VIDEO_PAUSE': ['onPause'],
+    # Where is the player play event?
+    'EVT_VIDEO_PLAY': ['onPlay'],
+    # Where is the player seek event?
+    'EVT_VIDEO_SEEK': ['onSeekFrom', 'onSeekTo'],
+    # Where is the fullscreen event?
+    'EVT_VIDEO_FULLSCREEN': ['onFullScreenEnter', 'onFullScreenExit'],
+    # Where is the volume up event?
+    'EVT_VIDEO_VOLUME_UP': [],
+    # Where is the volume down event?
+    'EVT_VIDEO_VOLUME_DOWN': [],
+    # Where is the volume mute event?
+    'EVT_VIDEO_VOLUME_MUTE': [],
+}
+
 # This is how external files access configuration parameters.
 # Need to be changed to any other XX_CONF when using non-edX platforms
-CONF = EDX_CONF
-
+# CONF = EDX_CONF
+CONF = ODK_CONF
 
 def get_inner_prop(obj, prop):
     """
