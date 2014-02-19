@@ -53,3 +53,17 @@ Limitations
 
 - Currently only works with YouTube videos
 - Currently only tested with the edX tracking log format
+
+
+ODK Workflow
+======
+
+- on interaction.ondemandkorea.com, run the following SQL query to save a day's log into a CSV file from inside mysql.
+ SELECT * FROM logs WHERE time >= '2014-02-16' AND time < '2014-02-17' INTO OUTFILE '/tmp/2014-02-16.csv' FIELDS TERMINATED BY ','ENCLOSED BY '"' LINES TERMINATED BY '\n'
+- add the following header to the first line of the created CSV
+ "id", "uid", "event", "post_id", "pos", "ip_addr", "play_id", "time"
+- import the CSV into MongoDB
+ mongoimport --db edxmodules_video_analytics_video_analytics --collection video_events_odk_20140216 --type csv --headerline --file ./2014-02-16.csv
+- set the right collection names inside views.py and video_logic.py
+- process-data
+

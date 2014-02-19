@@ -3,29 +3,37 @@
     Process raw database tracking entries related to the video player,
     and construct watching segments based on the entries.
 """
-from datetime import datetime, timedelta
 import math
+from datetime import datetime, timedelta
 from collections import Counter
-from common import get_prop, CONF
+from itertools import chain
 from xml.etree.ElementTree import ParseError
+from common import get_prop, CONF
+
 
 # name of the event collection
 #EVENTS_COL = 'video_events_harvardx_ph207x_fall2012'
 #EVENTS_COL = 'video_events' #mitx fall2012
 # EVENTS_COL = 'video_events_berkeleyx_cs188x_fall2012'
 # EVENTS_COL = 'video_events_vda101'  #Quanta workshop
-EVENTS_COL = 'video_events_test'
+# EVENTS_COL = 'video_events_test'
+EVENTS_COL = 'video_events_odk_20140216'
+
 #SEGMENTS_COL = 'video_segments_harvardx_ph207x_fall2012'
 #SEGMENTS_COL = 'video_segments' #mitx fall2012
 # SEGMENTS_COL = 'video_segments_berkeleyx_cs188x_fall2012'
 # SEGMENTS_COL = 'video_segments_vda101'  #Quanta workshop
-SEGMENTS_COL = 'video_segments_test' 
+# SEGMENTS_COL = 'video_segments_test' 
+SEGMENTS_COL = 'video_segments_odk_20140216' 
+
 #HEATMAPS_COL = 'video_heatmaps_harvardx_ph207x_fall2012'
 #HEATMAPS_COL = 'video_heatmaps' #mitx fall2012
 # HEATMAPS_COL = 'video_heatmaps_berkeleyx_cs188x_fall2012'
 # HEATMAPS_COL = 'video_heatmaps_vda101'  #Quanta workshop
-HEATMAPS_COL = 'video_heatmaps_test'  #Quanta workshop
-VIDEOS_COL = 'videos_test'
+# HEATMAPS_COL = 'video_heatmaps_test'
+HEATMAPS_COL = 'video_heatmaps_odk_20140216'
+
+VIDEOS_COL = 'videos_odk'
 
 def compute_view_count(start_times, threshold):
     """
@@ -62,7 +70,7 @@ def get_video_duration(video_id, host):
         import xml.etree.ElementTree as ET
         import urllib
         try:
-            f = urllib.urlopen("http://gdata.youtube.com/feeds/api/videos/" + video_id)
+            f = urllib.urlopen("http://gdata.youtube.com/feeds/api/videos/" + str(video_id))
             xml_string = f.read()
             tree = ET.fromstring(xml_string)
             for item in tree.iter('{http://gdata.youtube.com/schemas/2007}duration'):
@@ -102,6 +110,10 @@ def process_segments(mongodb, log_entries):
     videos = []
     for video in current_videos:
         videos.append(video)
+    # Keep track of all events supported by this video
+    temp_list = [CONF[key] for key in CONF if key.startswith("EVT")]
+    events_type_list = list(chain(*temp_list))
+
     data = {}
     index = 0
     for entry in log_entries:
@@ -109,14 +121,17 @@ def process_segments(mongodb, log_entries):
         if index % 1000 == 0:
             print ".",
         # print entry
-        username = get_prop(entry, "USERNAME")
+        username = str(get_prop(entry, "USERNAME"))
         # ignore ones that are already processed
         #if entry["processed"] == 1:
         #    continue
         # ignore if username is empty
         if username == "":
             continue
-        video_id = get_prop(entry, "VIDEO_ID")
+        # ignore if event type not supported.
+        if get_prop(entry, "TYPE_EVENT") not in events_type_list:    
+            continue
+        video_id = str(get_prop(entry, "VIDEO_ID"))
         # non-video player events
         if video_id == "":
             # TODO: use this to more accurately capture sessions
@@ -171,6 +186,7 @@ def construct_segments(log_entries):
     for i in range(1, len(log_entries)):
         entry1 = log_entries[i-1]
         entry2 = log_entries[i]
+        # print get_prop(entry1, "TYPE_EVENT"), get_prop(entry2, "TYPE_EVENT")
         try:
             e1_time = datetime.strptime(get_prop(entry1, "TIMESTAMP"), "%Y-%m-%d %H:%M:%S.%f")
         except ValueError:
@@ -179,7 +195,10 @@ def construct_segments(log_entries):
             except ValueError, v:
                 if len(v.args) > 0 and v.args[0].startswith('unconverted data remains: '):
                     new_time_string = get_prop(entry1, "TIMESTAMP")[:-(len(v.args[0])-26)]
-                    e1_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")            
+                    e1_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")   
+                else:
+                    e1_time = datetime.strptime(get_prop(entry1, "TIMESTAMP"), "%Y-%m-%d %H:%M:%S")
+                    # print "e1_time", e1_time     
             except:
                 print "time format error. moving on"
                 continue
@@ -191,7 +210,10 @@ def construct_segments(log_entries):
             except ValueError, v:
                 if len(v.args) > 0 and v.args[0].startswith('unconverted data remains: '):
                     new_time_string = get_prop(entry2, "TIMESTAMP")[:-(len(v.args[0])-26)]
-                    e2_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")            
+                    e2_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")  
+                else:          
+                    e2_time = datetime.strptime(get_prop(entry2, "TIMESTAMP"), "%Y-%m-%d %H:%M:%S")
+                    # print "e2_time", e2_time
             except:
                 print "time format error. moving on"
                 continue
@@ -287,7 +309,7 @@ def process_heatmaps(mongodb, segments, video_id, video_duration):
     # placeholders for keeping delta counts so that we can do a batch update.
     # if duration is not available, apply a large enough default value
     if video_duration == 0:
-        duration = 1200
+        duration = 3600
     else:
         duration = video_duration
     raw_counts = [0] * duration
@@ -356,7 +378,10 @@ def process_heatmaps(mongodb, segments, video_id, video_duration):
                 except ValueError, v:
                     if len(v.args) > 0 and v.args[0].startswith('unconverted data remains: '):
                         new_time_string = segment["date_start"][:-(len(v.args[0])-26)]
-                        parsed_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")            
+                        parsed_time = datetime.strptime(new_time_string, "%Y-%m-%dT%H:%M:%S")   
+                    else:         
+                        parsed_time = datetime.strptime(
+                            segment["date_start"], "%Y-%m-%d %H:%M:%S")   
                 except:
                     print "time format error. moving on"
                     continue

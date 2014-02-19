@@ -17,4 +17,6 @@ urlpatterns = patterns('',
 	url(r'^heatmap-dashboard/$', views.heatmap_dashboard, name='heatmap_dashboard'),
 	url(r'^export-heatmaps/$', views.export_heatmaps, name='export_heatmaps'),
 
+	url(r'^process-data-ajax/(?P<index>\d+)$', views.process_data_ajax, name='process_data_ajax'),
+	url(r'^process-heatmaps-ajax/(?P<index>\d+)$', views.process_heatmaps_ajax, name='process_heatmaps_ajax'),
 )

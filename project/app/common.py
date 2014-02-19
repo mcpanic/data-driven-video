@@ -83,7 +83,7 @@ ODK_CONF = {
     # Does the video autoplay?
     'AUTOPLAY_VIDEOS': True,
     # Where is this video hosted?
-    'VIDEO_HOST': 'youtube',
+    'VIDEO_HOST': 'odk',
     # Where is the absolute timestamp of an event stored?
     'TIMESTAMP': 'time',
     # Where is the event type information stored?
@@ -101,7 +101,7 @@ ODK_CONF = {
 
     ### events ###
     # Where is the page open event?
-    'EVT_PAGE_OPEN': ['onReady'],
+    'EVT_PAGE_OPEN': [], #['onReady'],
     # Where is the page close event?
     'EVT_PAGE_CLOSE': [],
     # Where is the next destination event?
@@ -111,9 +111,9 @@ ODK_CONF = {
     # Where is the player play event?
     'EVT_VIDEO_PLAY': ['onPlay'],
     # Where is the player seek event?
-    'EVT_VIDEO_SEEK': ['onSeekFrom', 'onSeekTo'],
+    'EVT_VIDEO_SEEK': [], #['onSeekFrom', 'onSeekTo'],
     # Where is the fullscreen event?
-    'EVT_VIDEO_FULLSCREEN': ['onFullScreenEnter', 'onFullScreenExit'],
+    'EVT_VIDEO_FULLSCREEN': [], #['onFullScreenEnter', 'onFullScreenExit'],
     # Where is the volume up event?
     'EVT_VIDEO_VOLUME_UP': [],
     # Where is the volume down event?

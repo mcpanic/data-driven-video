@@ -185,7 +185,7 @@ function displayVideos(){
     $.each(videos, function(){
         // console.log($(this), this["video_id"]);
         var num_users = get_value_by_id("unique_student_count", this["video_id"]);
-        var url = "video_single?vid=" + this["video_id"];
+        var url = "../video-single/" + this["video_id"];
         var $row = $("<tr/>");
         $("<td/>").html("<a href='" + url + "'>" + this["video_name"] + "</a>").appendTo($row);
         $("<td/>").text(formatStyle(this["recording_style"])).appendTo($row);

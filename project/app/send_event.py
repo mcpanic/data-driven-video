@@ -29,8 +29,10 @@ COURSE_END_DATE = "2012-11-19"
 #EVENTS_COL = 'video_events_harvardx_ph207x_fall2012'
 #EVENTS_COL = 'video_events' #mitx fall2012
 #EVENTS_COL = 'video_events_berkeleyx_cs188x_fall2012'
-EVENTS_COL = 'video_events_vda101'
+# EVENTS_COL = 'video_events_vda101'
+EVENTS_COL = 'video_events_odk'
 HTTP_ADDR = '192.168.20.40:9999'
+MONGODB_NAME = 'edxmodules_video_analytics_video_analytics'
 
 results = []
 
@@ -41,7 +43,7 @@ def send_events():
 def send_events_local():
     global results
     client = MongoClient()
-    mongodb = client['edxmodules_video_analytics_video_analytics'] 
+    mongodb = client[MONGODB_NAME] 
 
     start_time = time.time()
     valid_events = 0
@@ -96,7 +98,11 @@ def read_file(path):
             try:
                 #parsed_line = ast.literal_eval(line)
                 parsed_line = json.loads(line)
-                results.append(parsed_line)
+                # fix: if multiple entries exist per line
+                for i, entry in enumerate(parsed_line):
+                    results.append(entry)
+                # original: if an entry is per line
+                # results.append(parsed_line)
                 # print ".", 
             except ValueError:
                 pass
@@ -126,11 +132,12 @@ def main(argv):
     elif (argv[1] == "-dir"):
         start_date = COURSE_START_DATE
         end_date = COURSE_END_DATE
-        includes = ['*.log'] # log files only
+        includes = ['*.json'] #['*.log'] # log files only
         includes = r'|'.join([fnmatch.translate(x) for x in includes])
         for root, dirs, files in os.walk(sys.argv[2]):
             print "[", root, "]"
-            files = [f for f in files if re.match(includes, f) and start_date <= f <= end_date]
+            # files = [f for f in files if re.match(includes, f) and start_date <= f <= end_date]
+            files = [f for f in files if re.match(includes, f)]
             files.sort()
             for fname in files:
                 results = []

@@ -7,15 +7,15 @@ import time
 import json
 from bson import json_util
 from collections import defaultdict
-# from django.conf import settings
-# from prototypemodules.common import query_results
-# from edinsights.core.decorators import view, query, event_handler
-# memoize_query
-from video_logic import process_segments, process_heatmaps
 from itertools import chain
-from common import get_prop, CONF
 from pymongo import MongoClient
+from django.http import HttpResponse
 from django.shortcuts import render
+# from django.conf import settings
+# from edinsights.core.decorators import view, query, event_handler
+from common import get_prop, CONF
+from video_logic import process_segments, process_heatmaps
+
 
 # name of the event collection
 # COURSE_NAME = 'PH207x-Fall-2012'
@@ -35,19 +35,26 @@ from django.shortcuts import render
 # EVENTS_COL = 'video_events_vda101'  #Quanta workshop
 # EVENTS_COL = 'video_events_harvardx_ph207x_fall2012'
 # EVENTS_COL = 'video_events_test'
-EVENTS_COL = 'video_events'  #mitx fall2012
+# EVENTS_COL = 'video_events'  #mitx fall2012
 # EVENTS_COL = 'video_events_berkeleyx_cs188x_fall2012'
+EVENTS_COL = 'video_events_odk_20140216'  #ODK
+
 # SEGMENTS_COL = 'video_segments_vda101'  #Quanta workshop
 # SEGMENTS_COL = 'video_segments_harvardx_ph207x_fall2012'
 # SEGMENTS_COL = 'video_segments_test'
-SEGMENTS_COL = 'video_segments'  #mitx fall2012
+# SEGMENTS_COL = 'video_segments'  #mitx fall2012
 # SEGMENTS_COL = 'video_segments_berkeleyx_cs188x_fall2012'
+SEGMENTS_COL = 'video_segments_odk_20140216'  #ODK
+
 # HEATMAPS_COL = 'video_heatmaps_vda101'  #Quanta workshop
 # HEATMAPS_COL = 'video_heatmaps_harvardx_ph207x_fall2012'
 # HEATMAPS_COL = 'video_heatmaps_test'
-HEATMAPS_COL = 'video_heatmaps_mitx_fall2012'  #mitx fall2012
+# HEATMAPS_COL = 'video_heatmaps_mitx_fall2012'  #mitx fall2012
+HEATMAPS_COL = 'video_heatmaps_odk_20140216'  #ODK
 # HEATMAPS_COL = 'video_heatmaps_berkeleyx_cs188x_fall2012'
-VIDEOS_COL = 'videos'
+
+#VIDEOS_COL = 'videos'
+VIDEOS_COL = 'videos_odk'
 
 
 def get_db():
@@ -79,7 +86,7 @@ def prototype_interface(request, vid):
     [data, peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
-    return render(request, "prototype-view.html", {
+    return render(request, "app/prototype-view.html", {
         'video_id': vid, 'data': data, 'videos': videos, 'peaks': peaks
     })
 
@@ -95,7 +102,7 @@ def video_single(request, vid):
     [data, peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
-    return render(request, "single-view.html", {
+    return render(request, "app/single-view.html", {
         'video_id': vid, 'data': data, 'videos': videos, 'peaks': peaks
     })
 
@@ -110,7 +117,7 @@ def video_list(request):
     data = video_list_query()
     videos = video_info_query()
     # from edinsights.core.render import render
-    return render(request, "list-view.html", {
+    return render(request, "app/list-view.html", {
         'data': data, 'videos': videos
     })
 
@@ -242,6 +249,7 @@ def video_list_query():
     return result
 
 
+
 # @query(name="video_info")
 def video_info_query():
     """
@@ -250,11 +258,13 @@ def video_info_query():
     mongodb = get_db()    
     start_time = time.time()
 
-    collection = mongodb['videos']
-    # entries = list(collection.find().sort("video_name"))
+    collection = mongodb[VIDEOS_COL]
+    entries = list(collection.find().sort("video_name"))
     # entries = list(collection.find({ "$or": [{"course_name":"PH207x-Fall-2012"},{"course_name":"CS188x-Fall-2012"},{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
+    
     # only MIT courses
-    entries = list(collection.find({ "$or": [{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
+    # entries = list(collection.find({ "$or": [{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
+    
     # entries = list(collection.find({"course_name":"PH207x-Fall-2012"}).sort("video_name"))
     # entries = list(collection.find({"course_name":"6.00x-Fall-2012"}).sort("video_name"))
     # entries = list(collection.find({"course_name":"3.091x-Fall-2012"}).sort("video_name"))
@@ -277,7 +287,7 @@ def record_segments(mongodb):
     collection = mongodb[EVENTS_COL]
     # For incremental updates, retrieve only the events not processed yet.
     #entries = collection.find({"processed": 0}).limit(1000) #.batch_size(1000)
-    entries = collection.find().limit(500000) #.batch_size(1000)
+    entries = collection.find().limit(200000) #.batch_size(1000)
     print entries.count(), "new events found"
     data = process_segments(mongodb, list(entries))
     collection_seg = mongodb[SEGMENTS_COL]
@@ -331,7 +341,7 @@ def record_heatmaps(mongodb):
         if not segment["user_id"] in results[segment["video_id"]]:
             results[segment["video_id"]][segment["user_id"]] = []
         results[segment["video_id"]][segment["user_id"]].append(segment)
-    vid_col = mongodb['videos']
+    vid_col = mongodb[VIDEOS_COL]
     for video_id in results:
         result = list(vid_col.find({"video_id": video_id}))
         if len(result):
@@ -389,7 +399,7 @@ def process_data(request):
     record_heatmaps(mongodb)
     result = sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
     print result
-    return result
+    return HttpResponse(result)
 
 
 def record_segments_ajax(mongodb, index):
@@ -448,7 +458,7 @@ def record_heatmaps_ajax(mongodb, index):
     collection.remove()
     # TODO: handle cut segments (i.e., start event exists but end event missing)
     # TODO: only remove the corresponding entries in the database: (video, user)
-    vid_col = mongodb['videos']
+    vid_col = mongodb[VIDEOS_COL]
     video_list = list(vid_col.find())
     num_videos = len(video_list)
     for index, video in enumerate(video_list):
@@ -481,7 +491,7 @@ def data_dashboard(request):
     collection = mongodb[EVENTS_COL]
     num_entries = collection.find().count()
     # from edinsights.core.render import render
-    return render(request, "data-dashboard.html", {
+    return render(request, "app/data-dashboard.html", {
         'num_entries': num_entries
     })
 
@@ -492,13 +502,14 @@ def heatmap_dashboard(request):
     collection = mongodb[SEGMENTS_COL]
     num_entries = collection.find().count()
     # from edinsights.core.render import render
-    return render(request, "heatmap-dashboard.html", {
+    return render(request, "app/heatmap-dashboard.html", {
         'num_entries': num_entries
     })
 
 
 # @query(name="process_data_ajax")
 def process_data_ajax(request, index):
+    print index
     mongodb = get_db()	
     start_time = time.time()
     record_segments_ajax(mongodb, int(index))
@@ -506,13 +517,13 @@ def process_data_ajax(request, index):
     time_result = sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
     print time_result
     result = json.dumps({"index": index, "time": time_result})
-    #from django.http import HttpResponse
-    #return HttpResponse(result, mimetype='application/json')
-    return result
+    return HttpResponse(result, mimetype='application/json')
+    # return result
 
 
 # @query(name="process_heatmaps_ajax")
 def process_heatmaps_ajax(request, index):
+    print index
     mongodb = get_db()	
     start_time = time.time()
     #record_segments_ajax(mongodb, int(index))
@@ -520,9 +531,8 @@ def process_heatmaps_ajax(request, index):
     time_result = sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
     print time_result
     result = json.dumps({"index": index, "time": time_result})
-    #from django.http import HttpResponse
-    #return HttpResponse(result, mimetype='application/json')
-    return result
+    return HttpResponse(result, mimetype='application/json')
+    # return result
 
 
 # @query(name="export_heatmaps")
@@ -535,7 +545,7 @@ def export_heatmaps(request):
         with open("edxmodules/video_analytics/mongo-data/video_heatmaps_0812_" + HEATMAPS_COL + "_" + str(index) + ".json", "w+") as outfile:
             json.dump(entry, outfile, default=json_util.default, indent=0)    
         print index, "done"
-    return len(entries), "items written to", os.path.abspath(outfile.name)
+    return HttpResponse(len(entries) + " items written to " + os.path.abspath(outfile.name))
 
 
 # @query(name="test")
