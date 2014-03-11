@@ -187,7 +187,7 @@
 
     $(document).on("click", ".screenshot", function(){
         player.seekTo($(this).data("second") - 3);
-        $("#subgoal").text($(this).data("summary"));
+        $("#video-top #current-topic").text($(this).data("summary"));
     });
 
     $(document).on("mouseenter", ".screenshot", function(){

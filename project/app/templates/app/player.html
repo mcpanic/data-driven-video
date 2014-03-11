@@ -4,429 +4,30 @@
 <html>
 <head>
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700" rel='stylesheet' type='text/css'>
-<!--     <link href="${staticfiles_storage.url('djmodules/video_analytics/css/common.css')}" rel='stylesheet' type='text/css'>
-    <link href="${staticfiles_storage.url('djmodules/video_analytics/css/single-view.css')}" rel='stylesheet' type='text/css'>
-
-    <link href="${staticfiles_storage.url('djmodules/video_analytics/myplayer/style.css')}" rel='stylesheet' type='text/css'> -->
     <link href="{% static 'app/css/common.css' %}" rel='stylesheet' type='text/css'>
-    <link href="{% static 'app/css/single-view.css' %}" rel='stylesheet' type='text/css'>
-
     <link href="{% static 'app/myplayer/style.css' %}" rel='stylesheet' type='text/css'>
-
-    <!--<link href="//vjs.zencdn.net/4.3/video-js.css" rel="stylesheet">
-    <script src="//vjs.zencdn.net/4.3/video.js"></script>    -->
-
-<!--     <link href="${staticfiles_storage.url('djmodules/video_analytics/video-js/video-js.min.css')}" rel='stylesheet' type='text/css'>
-
-    <script src="${staticfiles_storage.url('djmodules/video_analytics/video-js/video.dev.js')}"></script>   
-
-    <script src="${staticfiles_storage.url('djmodules/video_analytics/videojs-youtube/vjs.youtube.js')}"></script>   
-    <link type="text/css" href="${staticfiles_storage.url('djmodules/video_analytics/css/flowplayer/minimalist.css')}" rel="stylesheet"> -->
-
-<!--     // <script src="${staticfiles_storage.url('djmodules/video_analytics/myplayer/script.js')}"></script>
-    // <script src="${staticfiles_storage.url('djmodules/video_analytics/js/jquery-1.10.2.min.js')}"></script>
-    // <script src="${staticfiles_storage.url('djmodules/video_analytics/js/d3.v3.min.js')}"></script> -->
-    <script src="{% static 'app/myplayer/script.js' %}"></script>
-    <script src="{% static 'app/js/jquery-1.10.2.min.js' %}"></script>
-    <script src="{% static 'app/js/d3.v3.min.js' %}"></script>
-
-<!--     // <script src="${staticfiles_storage.url('djmodules/video_analytics/js/flowplayer/flowplayer.min.js')}"></script> -->
-
-    <!--<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
-
-    <style>
-    .screenshot img{
-        margin-top: 10px;
-        margin-bottom: 10px;
-        width: 220px;
-        border: 1px solid #eeeeee;
-    }
-    .screenshot .summary{
-        position: absolute;
-        text-overflow: hidden;
-        overflow: hidden;
-        max-width: 170px;
-        width: 170px;
-        white-space: nowrap;
-        word-wrap: break-word;
-    }
-    .screenshot:hover {
-        background-color: #eeeeee;
-        cursor: pointer;
-    }
-    .screenshot .tooltip{
-        margin-top: 30px;
-        width: 250px;
-        position: absolute;
-        border: 1px solid #cccccc;
-        display: none;
-        z-index: 10;
-    }
-    #leftpane{
-        float:left;
-        width: 620px;
-    }
-    #sidebar{
-        float:left;
-        padding-left: 20px;
-    }
-
-    #bookmark{
-        height: 150px;
-        margin-bottom: 15px;
-    }
-
-    #add-bookmark-button{
-        float: left;
-        padding: 1em;
-        border: 0;
-        background-color: #eee;
-        width: 150px;
-        font-size: 0.9em;
-    }
-    #bookmark-thumbnail img{
-        float: left;
-        width: 220px;
-        border: 1px solid #eeeeee;
-        margin: 0 10px;
-    }
-    #bookmark-description{
-        display: none;
-        float: left;
-        margin: 0 10px;
-        padding: 0.5em;
-        width: 180px;
-    }
-    #bookmark-thumbnail, #save-bookmark-button, #cancel-bookmark-button{
-        display: none;
-    }
-    #save-bookmark-button{
-        margin-left: 10px;
-        margin-right: 20px;
-    }
-
-    #timeline{
-        position: relative;
-        width: 540px;
-        /*background-color: #bbb;*/
-        height: 5px;
-        margin-top: 80px;
-        margin-left: 3em;
-        margin-right: 3em;
-    }
-
-    .timeline-peak{
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        background-color: yellow;
-        margin-top: -5px;
-        border: 1px solid #ddd;
-    }
-
-    svg {
-        margin-top: -90px;
-    }
-
-    .pp-slider { width: 150px; float:left;  -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -o-user-select: none; user-select: none; height: 30px; }
-    .pp-slider .pp-slider-scale { background-color: #aaa; height: 1px; border-bottom: 1px solid #efefef; width: 120px; margin-top: 6px; float: left; }
-    .pp-slider .pp-slider-scale .pp-slider-button { width: 12px; border-radius: 2px; border: 1px solid #adadad; height: 16px; position: relative; top: -7px; left: 0px; background-color: #efefef; cursor: pointer; }
-    .pp-slider .pp-slider-scale .pp-slider-button .pp-slider-divies { border-left: 1px solid #adadad; border-right: 1px solid #adadad; position: relative; left: 3px; top: 3px; width: 4px; height: 10px; }
-    .pp-slider .pp-slider-scale .pp-slider-button:hover { border-color: #777; background-color: #eee;  }
-    .pp-slider .pp-slider-scale .pp-slider-tooltip { width: 24px; height: 20px; position: relative; top: -5px; left: 0px; text-align: center; font-size: 10px; color: #aaa; }
-    .pp-slider .pp-slider-min { float: left; width: 15px; color: #aaa; font-size: 10px; }
-    .pp-slider .pp-slider-max { float: left; width: 15px; color: #aaa; font-size: 10px; text-align: right; }
-    .pp-slider-tooltip{
-        display: none;
-    }
-    </style>
-
-    <script>
-    var chart;
-    var player;
-    var options = {};
-    var duration = 0;
-    var visWidth = 540;
-    var visHeight = 80;
-    var video_id = "{{ video_id }}";
-    var data = {{data|safe}};
-    var videos = {{videos|safe}};
-    var peaks = {{peaks|safe}};
-
-
-
-    function updatePeaks(position){
-        var threshold = 100 - position;
-        count = 0;
-        for (var index in peaks){
-            if (peaks[index][3] >= threshold){
-                $("#peak_" + peaks[index][1]).show();
-                $("#timeline-peak-" + peaks[index][1]).show();
-                count++;
-            } else {
-                $("#peak_" + peaks[index][1]).hide();
-                $("#timeline-peak-" + peaks[index][1]).hide();
-            }
-        }
-        $("#highlight-count").text(count);
-    }
-
-    function SortByTime(a, b){
-      var aName = a[1];
-      var bName = b[1]; 
-      return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
-    }
-
-
-    function displayPeaks(peaks){
-        $(".screenshot").remove();
-        $(".timeline-peak").remove();
-        peaks.sort(SortByTime);
-        for (var index in peaks){
-            // TODO: get rid of the temporary link
-            var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + peaks[index][1] + '.jpg';
-
-            // sidebar
-            $("<div/>")
-                .attr("id", "peak_" + peaks[index][1])
-                .data("second", peaks[index][1])
-                .data("summary", peaks[index][5])
-                .addClass("screenshot").html("<span class='tooltip'>" + peaks[index][4] + "</span><span>" + formatSeconds(peaks[index][1]) + " </span> <span class='summary'>" + peaks[index][5] + "</span><br/>" + "<img src='" + imgPath + "'>")
-                .appendTo("#sidebar");
-
-            //timeline
-            var xPos = peaks[index][1]/duration * 100;
-            $("<div/>")
-                .addClass("timeline-peak")
-                .attr("id", "timeline-peak-" + peaks[index][1])
-                .css("left", xPos + "%")
-                .appendTo("#timeline");
-        }
-        updatePeaks(0);
-        // updateTimeline(0);
-    }
-
-    $(document).on("click", ".screenshot", function(){
-        player.seekTo($(this).data("second") - 3);
-        $("#subgoal").text($(this).data("summary"));
-    });
-
-    $(document).on("mouseenter", ".screenshot", function(){
-        $(this).find(".tooltip").show();
-    });
-    $(document).on("mouseleave", ".screenshot", function(){
-        $(this).find(".tooltip").hide();
-    });
-
-    $(document).on("click", "#add-bookmark-button", function(){
-        var curTime = parseInt(player.getCurrentTime());
-        var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + curTime + '.jpg';
-        // console.log(curTime, imgPath);
-        if (!$(this).is(":disabled")){        
-            $(this).attr("disabled", "disabled");
-            $(this).data("curTime", curTime);
-            $("<img/>").attr("src", imgPath).appendTo("#bookmark-thumbnail");
-            $("#bookmark-thumbnail").show();
-            $("#bookmark-description").show();
-            $("#save-bookmark-button").show();
-            $("#cancel-bookmark-button").show();            
-        }
-        
-    });
-
-    function hideBookmarkPanel(){
-            $("#add-bookmark-button").removeAttr("disabled");
-            $("#bookmark-thumbnail img").attr("src", "");
-            $("#bookmark-description").val("");
-            $("#bookmark-thumbnail").hide();
-            $("#bookmark-description").hide();
-            $("#save-bookmark-button").hide();
-            $("#cancel-bookmark-button").hide();
-    }
-
-    $(document).on("click", "#save-bookmark-button", function(){
-        var curTime = $("#add-bookmark-button").data("curTime");
-        var description = $("#bookmark-description").val();
-        peaks.push([curTime-1, curTime, curTime+1, 100, "You bookmarked it.", description]);
-        displayPeaks(peaks);
-        hideBookmarkPanel();
-    });
-
-    $(document).on("click", "#cancel-bookmark-button", function(){
-        hideBookmarkPanel();    
-    });
-
-    $(document).ready(function(){
-        // Load the IFrame Player API code asynchronously.
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        init();
-        $("#vis-options a").eq(4).trigger("click");
-        $("#vis-options").hide();
-
-        // hard-coded data for prototyping
-        if (video_id == "aTuYZqhEvuk") {
-            peaks = [];
-            // [3] is the confidence or strength of the peak
-            peaks = [
-                [17, 18, 19, 20, "Other students re-watched this part. Verbal explanation", "Why iterative algorithms?"], 
-                [53, 54, 55, 50, "Slide begins.", "Iterative algorithms"], 
-                [76, 81, 88, 100, "Other students reviewed this slide.", "Iterative algorithms"], 
-                [136, 137, 138, 20, "Other students re-watched this part. Verbal explanation.", "Algorithm setup"],
-                [173, 176, 178, 100, "Other students re-watched this part. Important explanation.", "Iterative multiplication by successive additions"], 
-                [203, 205, 213, 100, "Other students re-watched this part. Code example starts.", "Iterative multiplication code exmaple"], 
-                [266, 268, 270, 100, "Other students re-watched this part. Code demonstration starts.", "Running iterative multiplication code in console"],
-                [290, 291, 292, 50, "Wrap-up.", "Summary of the lecture"]
-            ];
-        }
-
-        displayPeaks(peaks);
-
-        (function ($) {
-
-            var PPSliderClass = function (el, opts) {
-                var element = $(el);
-                var options = opts;
-                var isMouseDown = false;
-                var currentVal = 0;
-
-                element.wrap('<div/>')
-                var container = $(el).parent();
-
-                container.addClass('pp-slider');
-                container.addClass('clearfix');
-
-                container.append('<div class="pp-slider-min">-</div><div class="pp-slider-scale"><div class="pp-slider-button"><div class="pp-slider-divies"></div></div><div class="pp-slider-tooltip"></div></div><div class="pp-slider-max">+</div>');
-                
-                if (typeof(options) != 'undefined' && typeof(options.hideTooltip) != 'undefined' && options.hideTooltip == true)
-                {
-                  container.find('.pp-slider-tooltip').hide();
-                }
-
-                if (typeof(options.width) != 'undefined')
-                {
-                  container.css('width',(options.width+'px'));
-                }
-                container.find('.pp-slider-scale').css('width',(container.width()-30)+'px');
-
-                var startSlide = function (e) {            
-                  
-                  isMouseDown = true;
-                  var pos = getMousePosition(e);
-                  startMouseX = pos.x;
-                  
-                  lastElemLeft = ($(this).offset().left - $(this).parent().offset().left);
-                  updatePosition(e);
-
-                  return false;
-                };
-                
-                var getMousePosition = function (e) {
-                  //container.animate({ scrollTop: rowHeight }, options.scrollSpeed, 'linear', ScrollComplete());
-                  var posx = 0;
-                  var posy = 0;
-
-                  if (!e) var e = window.event;
-
-                  if (e.pageX || e.pageY) {
-                    posx = e.pageX;
-                    posy = e.pageY;
-                  }
-                  else if (e.clientX || e.clientY) {
-                    posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                    posy = e.clientY + document.body.scrollTop  + document.documentElement.scrollTop;
-                  }
-
-                  return { 'x': posx, 'y': posy };
-                };
-
-                var updatePosition = function (e) {
-                  var pos = getMousePosition(e);
-
-                  var spanX = (pos.x - startMouseX);
-
-                  var newPos = (lastElemLeft + spanX)
-                  var upperBound = (container.find('.pp-slider-scale').width()-container.find('.pp-slider-button').width());
-                  newPos = Math.max(0,newPos);
-                  newPos = Math.min(newPos,upperBound);
-                  currentVal = Math.round((newPos/upperBound)*100,0);
-
-                  container.find('.pp-slider-button').css("left", newPos);
-                  container.find('.pp-slider-tooltip').html(currentVal+'%');
-                  container.find('.pp-slider-tooltip').css('left', newPos-6);
-                  updatePeaks(currentVal);
-                };
-
-                var moving = function (e) {
-                  if(isMouseDown){
-                    updatePosition(e);
-                    return false;
-                  }
-                };
-
-                var dropCallback = function (e) {
-                  isMouseDown = false;
-                  element.val(currentVal);
-                  if(typeof element.options != 'undefined' && typeof element.options.onChanged == 'function'){
-                    element.options.onChanged.call(this, null);
-                  }
-
-                };
-
-                container.find('.pp-slider-button').bind('mousedown',startSlide);
-
-                $(document).mousemove(function(e) { moving(e); });
-                $(document).mouseup(function(e){ dropCallback(e); });
-                
-            };
-
-            /*******************************************************************************************************/
-
-            $.fn.PPSlider = function (options) {
-                var opts = $.extend({}, $.fn.PPSlider.defaults, options);
-
-                return this.each(function () {
-                    new PPSliderClass($(this), opts);
-                });
-            }
-
-            $.fn.PPSlider.defaults = {
-                width: 150
-            };
-
-
-        })(jQuery);
-
-
-        $("#slider1").PPSlider({width: 220});        
-    });
-
-    </script>
-<!--     // <script src="${staticfiles_storage.url('djmodules/video_analytics/js/common.js')}"></script>
-    // <script src="${staticfiles_storage.url('djmodules/video_analytics/js/single-view.js')}"></script>    --> 
-
-    <script src="{% static 'app/js/common.js' %}"></script>    
-    <script src="{% static 'app/js/single-view.js' %}"></script>
 </head>
+
 <body>
 <div class="container">
     <header>
-    <h2 class="title">
-        <span class="video-title"></span>
-    </h2>
+        <h2 class="title">
+            <span class="video-title"></span>
+        </h2>
     </header>
+
     <div id="tabs" class="clearfix">
-        <div><a class="tab-item" href="#" data-mode="summary">Summary</a></div>
-        <div><a class="tab-item" href="#" data-mode="heatmap">Heatmap</a></div>
-        <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div>
-        <div class="nav">
+        <div><a class="tab-item" href="#" data-mode="heatmap">Watch Video</a></div>
+        <div><a class="tab-item" href="#" data-mode="summary">View Stats</a></div>        
+        <!-- <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div> -->
+<!--         <div class="nav">
             <div class="prev"><a href="#">&lt; Prev</a></div>
             <div class="list"><a href="video_list">Dashboard</a></div>
             <div class="next"><a href="#">Next &gt; </a></div>
-        </div>        
+        </div>   -->      
+        <span class="search-button"></span>
+        <input type="text" class="search-bar" size="100" placeholder="search for keywords or topics inside the video">
+
     </div>
 
     <section id="stats">
@@ -473,7 +74,8 @@
 
     <section id="play-vis">
         <div id="leftpane">
-            <h3 id="subgoal">&nbsp;</h3>
+            <h3>Video</h3>
+            <!-- <h3 id="subgoal">&nbsp;</h3> -->
                  <!-- <video id="vid3" src="" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
                 </video> -->          
             <!-- <video id="example_video_1" class="video-js vjs-default-skin"
@@ -493,12 +95,17 @@
             </div> -->
 
             <div id="video-container">
-                <div id="overlay">overlay text</div>
+                <div id="video-top">
+                    <span id="prev-topic"></span>
+                    <span id="current-topic"></span>
+                    <span id="next-topic"></span>
+                </div>                
+                <div id="video-overlay">overlay text</div>
                 <!-- Video -->
                 <video id="video" width="540" height="330">
         <!--          <source src="videos/mikethefrog.webm" type="video/webm">
                   <source src="videos/mikethefrog.ogv" type="video/ogv"> -->
-                  <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4" type="video/mp4">
+ <!--                  <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4" type="video/mp4"> -->
                   <!-- <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4" type="video/mp4"> -->                    
                   <p>
                     Your browser doesn't support HTML5 video.
@@ -508,22 +115,23 @@
                 <!-- Video Controls -->
                 <div id="video-controls">
                     <input type="range" id="seek-bar" value="0"><br/>
-                    <button type="button" id="play-pause" class="play">&#9654;</button>
-                    <button type="button" id="mute">mute</button>
-                    <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1">
-                    <button type="button" id="full-screen">Full-Screen</button>                  
+                    <span id="play-pause" class="player-icon play pause-display"></span>
+                    <span id="time-display">0:00</span> <span id="duration-display"></span>
+                    <span id="mute" class="player-icon volume-high-display"></span>
+                    <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1.0">
+                    <span id="speed-button" data-speed="1.0">1.0x</span>
+                    <div id="speed-dropdown">
+                        <div class="speed-option" data-speed="1.0">1.0x</div>
+                        <div class="speed-option" data-speed="2.0">2.0x</div>
+                        <div class="speed-option" data-speed="4.0">4.0x</div>
+                        <div class="speed-option" data-speed="8.0">8.0x</div>
+                    </div>
+                    <span id="full-screen" class="player-icon fullscreen-display"></span>                  
                 </div>
             </div>
 
 
             <div id="ytplayer"></div>
-            <div id="bookmark">
-                <button id="add-bookmark-button">Add Highlight</button>
-                <div id="bookmark-thumbnail"></div>
-                <input id="bookmark-description" type="text" length="50" placeholder="type in description"/><br/>
-                <button id="save-bookmark-button">Save</button>
-                <button id="cancel-bookmark-button">Cancel</button>
-            </div>
             <div id="vis-options" class="clearfix">
                 <div><a class="" href="#" data-mode="raw_counts">views</a></div>
                 <div><a class="" href="#" data-mode="unique_counts">unique viewers</a></div>
@@ -531,19 +139,40 @@
                 <div><a class="" href="#" data-mode="skip_counts">skip</a></div>
                 <div><a class="" href="#" data-mode="play_counts">play</a></div>
                 <div><a class="" href="#" data-mode="pause_counts">pause</a></div>
+                <div><a class="" href="#" data-mode="play_kde">smoothed</a></div>
             </div>
             <div id="timeline"></div>
+            <div id="bookmark">
+                <button id="add-bookmark-button">Add Highlight</button>
+                <div id="bookmark-thumbnail"></div>
+                <div id="bookmark-time"></div>
+                <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
+                <button id="save-bookmark-button">Save</button>
+                <button id="cancel-bookmark-button">Cancel</button>
+            </div>            
         </div>
-        <div id="sidebar">
-            <h3>Highlights <small>(<span id="highlight-count"></span>)</small></h3>
-            <div>
-                <input type="checkbox"/>My highlights<br/>
-                <input type="checkbox"/>Other learners<br/>
-                <input type="checkbox"/>Visual transitions<br/>
-                <input type="checkbox"/>Topic transitions<br/><br/>
-                <input type="hidden" value="40" id="slider1"/>
-                <span>&nbsp;</span>
+        <div id="sidebar-1">
+            <h3>Highlights 
+                <small>(<span id="highlight-count"></span>)</small>
+                <div class="highlight-checkboxes">
+                    <input class="from-me" type="checkbox" checked/>
+                    <span class="by-me"></span>
+                    <label>by me</label>
+                    <input class="from-others" type="checkbox" checked/>
+                    <span class="by-others"></span>
+                    <label>by others</label>
+                    <!-- <input type="checkbox"/>Visual transitions<br/>
+                    <input type="checkbox"/>Topic transitions<br/><br/>
+                    <input type="hidden" value="40" id="slider1"/> -->
+                    <span>&nbsp;</span>
+                </div>
+            </h3>              
+            <div id="highlights">              
             </div>
+        </div>
+        <div id="sidebar-2">
+            <h3>Transcript</h3>            
+            <div id="transcript"></div>
         </div>
     </section>
 
@@ -551,54 +180,49 @@
         <h3>Views Over Time</h3>
     </section>
 </div>
-<script>
-// videojs('vid3', { "techOrder": ["youtube"], "src": "http://www.youtube.com/watch?v=jofNR_WkoCE" }).ready(function() {
-//       // Cue a video using ended event
-//       this.one('ended', function() {
-//         this.src('http://www.youtube.com/watch?v=jofNR_WkoCE');
-//       });
-//     });
-  var playlistIndex = 0;
-  var playlist = [
-    {
-      "title": "Not a YouTube Video",
-      "src": {
-        "type": "video/mp4",
-        "src": "http://d37sadnysgawf8.cloudfront.net/Blake_Turner_Studio.mp4"
-      }
-    },
-    {
-      "title": "YouTube Video",
-      "src": {
-        "type": "video/youtube",
-        "src": "http://www.youtube.com/watch?v=sJgDYdA8dio"
-      }
-    }
-];
 
-  var onEnded = function() {
-    if(playlistIndex == playlist.length - 1) {
-      playlistIndex = 0;
-    } else {
-      playlistIndex++;
-    }
+    <script src="{% static 'app/js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'app/js/d3.v3.min.js' %}"></script>
+    <script src="{% static 'app/js/common.js' %}"></script>        
+    <script src="{% static 'app/myplayer/Player.js' %}"></script>   
+    <script src="{% static 'app/myplayer/Timeline.js' %}"></script>
+    <script src="{% static 'app/myplayer/Highlight.js' %}"></script>
+    <script src="{% static 'app/myplayer/Transcript.js' %}"></script>
+    <script src="{% static 'app/myplayer/script.js' %}"></script>    
 
-    this.src(playlist[playlistIndex].src);
-    this.play();
-  };
+    <script>
+    var chart;
+    var player;
+    var options = {};
+    var duration = 0;
+    var visWidth = 540;
+    var visHeight = 80; // 80
+    var video_id = "{{ video_id }}";
+    var videoUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
+    var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.en.srt";
+    var data = {{data|safe}};
+    var videos = {{videos|safe}};
+    var peaks = {{peaks|safe}};
 
-  var options = { "techOrder": ["html5", "youtube"] };
-  // var player = videojs('vid3', options, function(){
-  //   this.src(playlist[playlistIndex].src);
-  //   //this.play();
-  //   this.on('ended', onEnded.bind(this));
-  //   });
-// videojs('vid3', { "techOrder": ["youtube"], "src": "https://www.youtube.com/watch?v=aTuYZqhEvuk" }).ready(function() {
-//     // Cue a video using ended event
-//     this.one('ended', function() {
-//       this.src('http://www.youtube.com/watch?v=jofNR_WkoCE');
-//     });
-//   }); 
-</script>
+    $(document).ready(function(){
+        // Load the IFrame Player API code asynchronously.
+        // var tag = document.createElement('script');
+        // tag.src = "https://www.youtube.com/iframe_api";
+        // var firstScriptTag = document.getElementsByTagName('script')[0];
+        // firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        Player.init(videoUrl);
+        Transcript.init(transcriptUrl);
+        Timeline.init(visWidth, visHeight);
+        duration = getDuration(video_id);
+        $("#duration-display").text(" / " + formatSeconds(duration));
+        Highlight.init(peaks);
+        // $("#timeline").css("margin-top", visHeight + "px");
+        init();
+        // var curMargin = parseInt($(".chart").css("margin-top"));
+        // $(".play-chart").css("margin-top", (curMargin - (visHeight-135)) + "px"); // 80
+        // $("#slider1").PPSlider({width: 220});        
+    });
+    </script>
+
 </body>
 </html>

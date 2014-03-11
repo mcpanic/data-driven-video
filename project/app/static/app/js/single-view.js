@@ -11,7 +11,7 @@ function moveLine(currentTime){
     var chart = d3.selectAll("svg.play-chart");
     if (chart.length === 0)
         return;
-    var curPosition = chart.attr("width") * currentTime / duration;
+    var curPosition = chart.attr("width") * currentTime / duration + 3;
     chart.selectAll(".playbar")
         .transition()
         .duration(0)

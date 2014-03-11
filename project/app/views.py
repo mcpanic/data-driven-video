@@ -15,7 +15,7 @@ from django.shortcuts import render
 # from edinsights.core.decorators import view, query, event_handler
 from common import get_prop, CONF
 from video_logic import process_segments, process_heatmaps
-
+from algorithms import get_kde, detect_peaks
 
 # name of the event collection
 # COURSE_NAME = 'PH207x-Fall-2012'
@@ -35,26 +35,26 @@ from video_logic import process_segments, process_heatmaps
 # EVENTS_COL = 'video_events_vda101'  #Quanta workshop
 # EVENTS_COL = 'video_events_harvardx_ph207x_fall2012'
 # EVENTS_COL = 'video_events_test'
-# EVENTS_COL = 'video_events'  #mitx fall2012
+EVENTS_COL = 'video_events'  #mitx fall2012
 # EVENTS_COL = 'video_events_berkeleyx_cs188x_fall2012'
-EVENTS_COL = 'video_events_odk_20140216'  #ODK
+# EVENTS_COL = 'video_events_odk_20140216'  #ODK
 
 # SEGMENTS_COL = 'video_segments_vda101'  #Quanta workshop
 # SEGMENTS_COL = 'video_segments_harvardx_ph207x_fall2012'
 # SEGMENTS_COL = 'video_segments_test'
-# SEGMENTS_COL = 'video_segments'  #mitx fall2012
+SEGMENTS_COL = 'video_segments'  #mitx fall2012
 # SEGMENTS_COL = 'video_segments_berkeleyx_cs188x_fall2012'
-SEGMENTS_COL = 'video_segments_odk_20140216'  #ODK
+# SEGMENTS_COL = 'video_segments_odk_20140216'  #ODK
 
 # HEATMAPS_COL = 'video_heatmaps_vda101'  #Quanta workshop
 # HEATMAPS_COL = 'video_heatmaps_harvardx_ph207x_fall2012'
 # HEATMAPS_COL = 'video_heatmaps_test'
-# HEATMAPS_COL = 'video_heatmaps_mitx_fall2012'  #mitx fall2012
-HEATMAPS_COL = 'video_heatmaps_odk_20140216'  #ODK
+HEATMAPS_COL = 'video_heatmaps_mitx_fall2012'  #mitx fall2012
+# HEATMAPS_COL = 'video_heatmaps_odk_20140216'  #ODK
 # HEATMAPS_COL = 'video_heatmaps_berkeleyx_cs188x_fall2012'
 
-#VIDEOS_COL = 'videos'
-VIDEOS_COL = 'videos_odk'
+VIDEOS_COL = 'videos'
+# VIDEOS_COL = 'videos_odk'
 
 
 def get_db():
@@ -134,7 +134,7 @@ def video_single_query(vid):
     # Quanta workshop
     collection = mongodb[HEATMAPS_COL]   
     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
-    print vid, entries
+    # print vid, entries
     # L@S 2014 analysis
     # collection = mongodb["video_heatmaps_mitx_fall2012"]
     # entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
@@ -146,77 +146,30 @@ def video_single_query(vid):
     #     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
 
     if len(entries):
-        windows = json.dumps(detect_peaks(entries[0]), default=json_util.default)
+        import numpy as np
+        # First, smooth the points and run peak detection
+        play_points = entries[0]["play_counts"] 
+        play_points[0] = 0
+        #play_points[0:int(len(play_points)*0.03)] = [0]*int(len(play_points)*0.03)
+        play_kde = get_kde(np.array(play_points), 0.02)
+        # mask nan values 
+        #print "contains nan:", np.all(np.isnan(play_kde[:,1]), 0)
+        #if np.all(np.isnan(play_kde[:,1]), 0):
+        #    play_kde = [[index, point] for index, point in enumerate(play_points)]
+        for index, point in enumerate(play_kde[:,1]):
+            if np.isnan(point):
+              play_kde[:,1][index] = play_points[index]        
+        masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde)) 
+        #print masked_play_kde, "max", np.max(masked_play_kde[:,1]) 
+        play_kde = masked_play_kde 
+        play_peaks = detect_peaks(play_kde[:,1], 3) 
+        entries[0]["play_kde"] = play_kde[:,1].tolist()
+        windows = json.dumps(play_peaks, default=json_util.default)
         result = json.dumps(entries[0], default=json_util.default)
     else:
         result = ""
     print sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
     return [result, windows]
-
-
-def detect_peaks_update(oldmean, oldmeandev, updatevalue):
-    import math
-    ALPHA = 0.125
-    diff = math.fabs(oldmean - updatevalue)
-    newmeandev = ALPHA * diff + (1-ALPHA) * oldmeandev
-    newmean = ALPHA * updatevalue + (1-ALPHA) * oldmean
-    return [newmean, newmeandev]
-
-
-def detect_peaks(data):
-    """
-    peak detection algorithm
-    """
-    import numpy
-    import math
-    bins = data["pause_counts"]
-    
-    P = 5
-    TAU = 4
-
-    # for i, count in enumerate(bins):
-    #     print i, count
-
-    # list of peaks - their start, end, and peak time
-    windows = []
-    mean = bins[5]
-
-    meandev = numpy.var(bins[5:5+P])
-    print mean, meandev
-    # for i in range(1, len(bins)-1):
-    i = 2
-    while i < len(bins):
-        # print "dev", i, math.fabs(bins[i] - mean) / meandev
-        if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]:
-            start = i - 1
-            print "start", start
-            while i < len(bins) and bins[i] > bins[i-1]:
-                [mean, meandev] = detect_peaks_update(mean, meandev, bins[i])
-                i = i + 1
-            print "peak", i - 1
-            peak = i - 1
-            end = i
-            while i < len(bins) and bins[i] > bins[start]:
-                # until the bin counts are back at the level they started
-                if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]: 
-                    # another significant rise found, so quit the downhill climbing
-                    print "another hill", i
-                    i = i - 1
-                    end = i
-                    break
-                else:
-                    [mean, meandev] = detect_peaks_update(mean, meandev, bins[i])
-                    # print "downhill", i
-                    end = i
-                    i = i + 1
-
-            windows.append([start, peak, end])
-            print "window added", start, peak, end
-        else:
-            [mean, meandev] = detect_peaks_update(mean, meandev, bins[i])
-            # print mean
-        i = i + 1
-    return windows
 
 
 # @query(name="video_list")
