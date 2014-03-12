@@ -203,7 +203,7 @@ var currentTopic;
 
     var isPeak = false;
     // Update the seek bar as the video plays
-    function videoTimeUpdateHandler(){
+    function videoTimeUpdateHandler() {
         if (isPlayUntil)
             console.log("update", video.currentTime, video.playbackRate);
         // Calculate the slider value

@@ -25,7 +25,7 @@ var Transcript = function ($, window, document) {
                         isScrollLocked = true;
                         scrollLockCount = 0;
                     });
-                    setInterval(startScrollCheck, 3000);
+                    setInterval(checkScroll, 3000);
                 }, 2000);
 
             })
@@ -42,17 +42,16 @@ var Transcript = function ($, window, document) {
         $(document).on("click", ".transcript-time", transcriptClickHandler);
         $(document).on("click", ".transcript-text", transcriptClickHandler);
         $(document).on("click", ".search-found", transcriptClickHandler);
-
+        $(document).on("click", ".search-cancel", searchCancelClickHandler);
         // s.addEventListener('keydown', find , false);
         // s.addEventListener('keyup', searchHandler, false);
     }
 
     // unlock scroll if no scroll for 5 seconds && in current viewport
-    function startScrollCheck() {
+    function checkScroll() {
         // offset: location of "current" in respect to transcript
         var offset = document.querySelector(".transcript-entry.current").getBoundingClientRect().top - document.querySelector("#transcript").getBoundingClientRect().top;
         // console.log("scrollCount", scrollLockCount, offset);
-
         // if within the current viewport, increment count
         if ($(".transcript-entry.current").length === 1
             && offset >= 0
@@ -63,9 +62,7 @@ var Transcript = function ($, window, document) {
                 scrollLockCount = 0;
                 // console.log("scroll start");
             }
-
         }
-
     }
 
 
@@ -77,12 +74,13 @@ var Transcript = function ($, window, document) {
             return;
         }
         // console.log($(".transcript-entry.current"));
-        var sh = document.querySelector('.jspPane').scrollHeight;
+        // var sh = document.querySelector('.jspPane').scrollHeight;
         // $(".transcript-entry.current")
         //     .css("top", this.offsetTop * 100 / sh + "%");
         //     document.querySelector('.transcript-entry.current').offsetTop * 100 / sh + "%"
         api.scrollTo(0, document.querySelector('.transcript-entry.current').offsetTop - 200);
     }
+
 
     // highlight the current sentence
     function highlightSentence(second) {
@@ -108,7 +106,23 @@ var Transcript = function ($, window, document) {
     }
 
 
-    function searchKeyupHandler() {
+    function searchCancelClickHandler() {
+        var s = document.querySelector('input.search-bar');
+        $(".timeline-peak").remove();
+        $(".search-tick").remove();
+        $(".timeline-result").remove();
+        $(".search-summary").text("");
+        $(".search-found").each(function () {
+            $(this).replaceWith($(this).text());
+        });
+        s.value = "";
+        // back to the original graph
+        $("#vis-options a").eq(6).trigger("click");
+        Highlight.displayPeaks(peaks);
+        $(".search-cancel").addClass("hide");
+    }
+
+    function searchKeyupHandler(e) {
         var s = document.querySelector('input.search-bar');
         var p = document.querySelectorAll('.transcript-text');
         var count = 0;
@@ -121,14 +135,23 @@ var Transcript = function ($, window, document) {
         $(".search-found").each(function () {
             $(this).replaceWith($(this).text());
         });
-        // search is over, return to the interaction peaks
+
+        // if esc key is pressed, cancel search
+        if (e.keyCode == 27) {
+            s.value = "";
+            term = "";
+        }
+        // if the search query is empty, return to the interaction peaks
         if (term.length == 0) {
-            console.log("search over");
-            // back to the original graph
-            $("#vis-options a").eq(6).trigger("click");
-            Highlight.displayPeaks(peaks);
+            searchCancelClickHandler();
+            // console.log("search over");
+            // // back to the original graph
+            // $("#vis-options a").eq(6).trigger("click");
+            // Highlight.displayPeaks(peaks);
+            // $(".search-cancel").addClass("hide");
             return;
         }
+        $(".search-cancel").removeClass("hide");
         // search starts only for queries longer than 3 characters
         if (term.length < 3)
             return;
