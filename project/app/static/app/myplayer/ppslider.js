@@ -1,3 +1,4 @@
+"use strict";
 
 (function ($) {
 
@@ -14,7 +15,7 @@
         container.addClass('clearfix');
 
         container.append('<div class="pp-slider-min">-</div><div class="pp-slider-scale"><div class="pp-slider-button"><div class="pp-slider-divies"></div></div><div class="pp-slider-tooltip"></div></div><div class="pp-slider-max">+</div>');
-        
+
         if (typeof(options) != 'undefined' && typeof(options.hideTooltip) != 'undefined' && options.hideTooltip == true)
         {
           container.find('.pp-slider-tooltip').hide();
@@ -26,18 +27,18 @@
         }
         container.find('.pp-slider-scale').css('width',(container.width()-30)+'px');
 
-        var startSlide = function (e) {            
-          
+        var startSlide = function (e) {
+
           isMouseDown = true;
           var pos = getMousePosition(e);
           startMouseX = pos.x;
-          
+
           lastElemLeft = ($(this).offset().left - $(this).parent().offset().left);
           updatePosition(e);
 
           return false;
         };
-        
+
         var getMousePosition = function (e) {
           //container.animate({ scrollTop: rowHeight }, options.scrollSpeed, 'linear', ScrollComplete());
           var posx = 0;
@@ -94,7 +95,7 @@
 
         $(document).mousemove(function(e) { moving(e); });
         $(document).mouseup(function(e){ dropCallback(e); });
-        
+
     };
 
     /*******************************************************************************************************/

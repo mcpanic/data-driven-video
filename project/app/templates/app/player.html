@@ -4,6 +4,8 @@
 <html>
 <head>
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700" rel='stylesheet' type='text/css'>
+    <!-- styles needed by jScrollPane -->
+    <link href="{% static 'app/css/jquery.jscrollpane.css' %}" rel='stylesheet' type='text/css'>
     <link href="{% static 'app/css/common.css' %}" rel='stylesheet' type='text/css'>
     <link href="{% static 'app/myplayer/style.css' %}" rel='stylesheet' type='text/css'>
 </head>
@@ -18,15 +20,16 @@
 
     <div id="tabs" class="clearfix">
         <div><a class="tab-item" href="#" data-mode="heatmap">Watch Video</a></div>
-        <div><a class="tab-item" href="#" data-mode="summary">View Stats</a></div>        
+        <div><a class="tab-item" href="#" data-mode="summary">View Stats</a></div>
         <!-- <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div> -->
 <!--         <div class="nav">
             <div class="prev"><a href="#">&lt; Prev</a></div>
             <div class="list"><a href="video_list">Dashboard</a></div>
             <div class="next"><a href="#">Next &gt; </a></div>
-        </div>   -->      
+        </div>   -->
         <span class="search-button"></span>
         <input type="text" class="search-bar" size="100" placeholder="search for keywords or topics inside the video">
+        <span class="search-summary"></span>
 
     </div>
 
@@ -47,7 +50,7 @@
             <div class="stat"></div>
             <div class="desc">students completed</div>
             <div class="substat"></div>
-        </div>            
+        </div>
         <div class="stat-box views-per-student">
             <div class="stat"></div>
             <div class="desc">views per student</div>
@@ -70,14 +73,14 @@
                 <th class="percent-views"><span>% Views</span><span class="sort-option" data-default="ascending"></span></th>
             </tr>
         </table>
-    </section>    
+    </section>
 
     <section id="play-vis">
         <div id="leftpane">
             <h3>Video</h3>
             <!-- <h3 id="subgoal">&nbsp;</h3> -->
                  <!-- <video id="vid3" src="" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
-                </video> -->          
+                </video> -->
             <!-- <video id="example_video_1" class="video-js vjs-default-skin"
               controls preload="auto" width="640" height="264"
               poster="http://video-js.zencoder.com/oceans-clip.png"
@@ -85,7 +88,7 @@
              <source src="http://video-js.zencoder.com/oceans-clip.mp4" type='video/mp4' />
              <source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm' />
              <source src="http://video-js.zencoder.com/oceans-clip.ogv" type='video/ogg' />
-            </video>  -->          
+            </video>  -->
 <!--             <div class="flowplayer">
                 <video>
                  <source type="video/webm" src="${staticfiles_storage.url('djmodules/video_analytics/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4')}">
@@ -99,14 +102,14 @@
                     <span id="prev-topic"></span>
                     <span id="current-topic"></span>
                     <span id="next-topic"></span>
-                </div>                
+                </div>
                 <div id="video-overlay">overlay text</div>
                 <!-- Video -->
                 <video id="video" width="540" height="330">
         <!--          <source src="videos/mikethefrog.webm" type="video/webm">
                   <source src="videos/mikethefrog.ogv" type="video/ogv"> -->
  <!--                  <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4" type="video/mp4"> -->
-                  <!-- <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4" type="video/mp4"> -->                    
+                  <!-- <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4" type="video/mp4"> -->
                   <p>
                     Your browser doesn't support HTML5 video.
                     <a href="videos/mikethefrog.mp4">Download</a> the video instead.
@@ -126,7 +129,7 @@
                         <div class="speed-option" data-speed="4.0">4.0x</div>
                         <div class="speed-option" data-speed="8.0">8.0x</div>
                     </div>
-                    <span id="full-screen" class="player-icon fullscreen-display"></span>                  
+                    <span id="full-screen" class="player-icon fullscreen-display"></span>
                 </div>
             </div>
 
@@ -149,10 +152,10 @@
                 <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
                 <button id="save-bookmark-button">Save</button>
                 <button id="cancel-bookmark-button">Cancel</button>
-            </div>            
+            </div>
         </div>
         <div id="sidebar-1">
-            <h3>Highlights 
+            <h3>Highlights
                 <small>(<span id="highlight-count"></span>)</small>
                 <div class="highlight-checkboxes">
                     <input class="from-me" type="checkbox" checked/>
@@ -166,13 +169,14 @@
                     <input type="hidden" value="40" id="slider1"/> -->
                     <span>&nbsp;</span>
                 </div>
-            </h3>              
-            <div id="highlights">              
+            </h3>
+            <div id="highlights">
             </div>
         </div>
         <div id="sidebar-2">
-            <h3>Transcript</h3>            
+            <h3>Transcript</h3>
             <div id="transcript"></div>
+            <!-- <div id="transcript-scroll"></div> -->
         </div>
     </section>
 
@@ -183,12 +187,18 @@
 
     <script src="{% static 'app/js/jquery-1.10.2.min.js' %}"></script>
     <script src="{% static 'app/js/d3.v3.min.js' %}"></script>
-    <script src="{% static 'app/js/common.js' %}"></script>        
-    <script src="{% static 'app/myplayer/Player.js' %}"></script>   
+
+    <!-- the mousewheel plugin - optional to provide mousewheel support -->
+    <script src="{% static 'app/js/jscrollpane/jquery.mousewheel.js' %}"></script>
+    <!-- the jScrollPane script -->
+    <script src="{% static 'app/js/jscrollpane/jquery.jscrollpane.min.js' %}"></script>
+
+    <script src="{% static 'app/js/common.js' %}"></script>
+    <script src="{% static 'app/myplayer/Player.js' %}"></script>
     <script src="{% static 'app/myplayer/Timeline.js' %}"></script>
     <script src="{% static 'app/myplayer/Highlight.js' %}"></script>
     <script src="{% static 'app/myplayer/Transcript.js' %}"></script>
-    <script src="{% static 'app/myplayer/script.js' %}"></script>    
+    <script src="{% static 'app/myplayer/script.js' %}"></script>
 
     <script>
     var chart;
@@ -220,7 +230,7 @@
         init();
         // var curMargin = parseInt($(".chart").css("margin-top"));
         // $(".play-chart").css("margin-top", (curMargin - (visHeight-135)) + "px"); // 80
-        // $("#slider1").PPSlider({width: 220});        
+        // $("#slider1").PPSlider({width: 220});
     });
     </script>
 

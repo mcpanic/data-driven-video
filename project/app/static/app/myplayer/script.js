@@ -1,25 +1,26 @@
- 
+"use strict";
 
 /* Add event handlers for tab menu and visualization options */
-function bindEvents(){
-    $("#tabs .tab-item").click(function(){
-        if ($(this).hasClass("active"))
+function bindEvents() {
+    $("#tabs .tab-item").click(function () {
+        if ($(this).hasClass("active")) {
             return;
+        }
         $(".tab-item").removeClass("active");
         $(this).addClass("active");
         $("section").hide();
-        if ($(this).attr("data-mode") == "summary"){
+        if ($(this).attr("data-mode") === "summary"){
             $("#stats").show();
             $("#speed").show();
-        } else if ($(this).attr("data-mode") == "heatmap"){
+        } else if ($(this).attr("data-mode") === "heatmap"){
             $("#play-vis").show();
-        } else if ($(this).attr("data-mode") == "views"){
+        } else if ($(this).attr("data-mode") === "views"){
             $("#time-vis").show();
         }
         return false;
     });
 
-    $("#vis-options a").click(function(){
+    $("#vis-options a").click(function () {
         // console.log($(this).text(), "clicked");
         $("#vis-options a").removeClass("active");
         $(this).addClass("active");
@@ -27,10 +28,10 @@ function bindEvents(){
         // var processedData = processData(data, mode, binSize, duration);
         var processedData = data[mode];
         // filter out initial play events because they are mandatory
-        if (mode == "play_counts")
+        if (mode === "play_counts")
             processedData[0] = 0;
         // filter out final pause events because they are mandatory
-        if (mode == "pause_counts"){
+        if (mode === "pause_counts"){
             processedData[0] = 0;
             processedData[processedData.length-1] = 0;
         }
@@ -54,9 +55,9 @@ function displayStats(){
     // $(".unique-views .substat").text("x% of total enrolled");
     $(".complete-count .stat").text(data["completion_count"]);
     $(".complete-count .substat").text("completion rate: " + (data["completion_count"]*100/num_users).toFixed(1) + "%");
-    // $(".replay-count").text(getObjectSize(replay_users) + 
+    // $(".replay-count").text(getObjectSize(replay_users) +
     //     " (" + (getObjectSize(replay_users)*100/num_users).toFixed(1) + "% of all viewers)");
-    // $(".skip-count").text(getObjectSize(skip_users) + 
+    // $(".skip-count").text(getObjectSize(skip_users) +
     //     " (" + (getObjectSize(skip_users)*100/num_users).toFixed(1) + "% of all viewers)");
     $(".views-per-student .stat").text((data["view_count"] / num_users).toFixed(2));
     $(".watching-time .stat").text(formatSeconds(data["total_watching_time"] / num_users));
@@ -142,8 +143,8 @@ function init(){
     $("#tabs a").first().trigger("click");
     // $("#vis-options a").first().trigger("click");
     $("#vis-options a").eq(6).trigger("click");
-    $("#vis-options").hide();    
+    $("#vis-options").hide();
     $("#speed-table th").first().trigger("click");
-    //displayPeaks(peaks);    
+    //displayPeaks(peaks);
 }
 

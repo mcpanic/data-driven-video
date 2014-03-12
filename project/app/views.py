@@ -59,7 +59,8 @@ VIDEOS_COL = 'videos'
 
 def get_db():
     client = MongoClient()
-    mongodb = client['edxmodules_video_analytics_video_analytics'] 
+    # mongodb = client['edxmodules_video_analytics_video_analytics']
+    mongodb = client['video']
     return mongodb
 
 
@@ -82,7 +83,7 @@ def prototype_interface(request, vid):
     """
     Example: http://localhost:9999/view/prototype_interface?vid=2deIoNhqDsg
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     [data, peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
@@ -98,7 +99,7 @@ def video_single(request, vid):
     for a single video segment.
     Example: http://localhost:9999/view/video_single?vid=2deIoNhqDsg
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     [data, peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
@@ -113,7 +114,7 @@ def video_list(request):
     Visualize students' interaction with video content
     for all videos in the events database
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     data = video_list_query()
     videos = video_info_query()
     # from edinsights.core.render import render
@@ -128,41 +129,41 @@ def video_single_query(vid):
     Return heatmap information from the database for a single video.
     Example: http://localhost:9999/query/video_single?vid=2deIoNhqDsg
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     start_time = time.time()
 
     # Quanta workshop
-    collection = mongodb[HEATMAPS_COL]   
+    collection = mongodb[HEATMAPS_COL]
     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
     # print vid, entries
     # L@S 2014 analysis
     # collection = mongodb["video_heatmaps_mitx_fall2012"]
     # entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
     # if len(entries) == 0:
-    #     collection = mongodb["video_heatmaps_harvardx_ph207x_fall2012"]    
+    #     collection = mongodb["video_heatmaps_harvardx_ph207x_fall2012"]
     #     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
     # if len(entries) == 0:
-    #     collection = mongodb["video_heatmaps_berkeleyx_cs188x_fall2012"]    
+    #     collection = mongodb["video_heatmaps_berkeleyx_cs188x_fall2012"]
     #     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
 
     if len(entries):
         import numpy as np
         # First, smooth the points and run peak detection
-        play_points = entries[0]["play_counts"] 
+        play_points = entries[0]["play_counts"]
         play_points[0] = 0
         #play_points[0:int(len(play_points)*0.03)] = [0]*int(len(play_points)*0.03)
         play_kde = get_kde(np.array(play_points), 0.02)
-        # mask nan values 
+        # mask nan values
         #print "contains nan:", np.all(np.isnan(play_kde[:,1]), 0)
         #if np.all(np.isnan(play_kde[:,1]), 0):
         #    play_kde = [[index, point] for index, point in enumerate(play_points)]
         for index, point in enumerate(play_kde[:,1]):
             if np.isnan(point):
-              play_kde[:,1][index] = play_points[index]        
-        masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde)) 
-        #print masked_play_kde, "max", np.max(masked_play_kde[:,1]) 
-        play_kde = masked_play_kde 
-        play_peaks = detect_peaks(play_kde[:,1], 3) 
+              play_kde[:,1][index] = play_points[index]
+        masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde))
+        #print masked_play_kde, "max", np.max(masked_play_kde[:,1])
+        play_kde = masked_play_kde
+        play_peaks = detect_peaks(play_kde[:,1], 3)
         entries[0]["play_kde"] = play_kde[:,1].tolist()
         windows = json.dumps(play_peaks, default=json_util.default)
         result = json.dumps(entries[0], default=json_util.default)
@@ -177,7 +178,7 @@ def video_list_query():
     """
     Return heatmap information from the database for all videos.
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     start_time = time.time()
 
     # Quanta workshop
@@ -208,16 +209,16 @@ def video_info_query():
     """
     Get a list of all videos in the database
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     start_time = time.time()
 
     collection = mongodb[VIDEOS_COL]
     entries = list(collection.find().sort("video_name"))
     # entries = list(collection.find({ "$or": [{"course_name":"PH207x-Fall-2012"},{"course_name":"CS188x-Fall-2012"},{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
-    
+
     # only MIT courses
     # entries = list(collection.find({ "$or": [{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
-    
+
     # entries = list(collection.find({"course_name":"PH207x-Fall-2012"}).sort("video_name"))
     # entries = list(collection.find({"course_name":"6.00x-Fall-2012"}).sort("video_name"))
     # entries = list(collection.find({"course_name":"3.091x-Fall-2012"}).sort("video_name"))
@@ -346,7 +347,7 @@ def process_data(request):
     It batch-processes all events not marked as processed.
     Generate segments and heatmaps for visualization and stat analysis.
     """
-    mongodb = get_db()    
+    mongodb = get_db()
     start_time = time.time()
     record_segments(mongodb)
     record_heatmaps(mongodb)
@@ -440,7 +441,7 @@ def record_heatmaps_ajax(mongodb, index):
 
 # @view(name="data_dashboard")
 def data_dashboard(request):
-    mongodb = get_db()	
+    mongodb = get_db()
     collection = mongodb[EVENTS_COL]
     num_entries = collection.find().count()
     # from edinsights.core.render import render
@@ -451,7 +452,7 @@ def data_dashboard(request):
 
 # @view(name="heatmap_dashboard")
 def heatmap_dashboard(request):
-    mongodb = get_db()	
+    mongodb = get_db()
     collection = mongodb[SEGMENTS_COL]
     num_entries = collection.find().count()
     # from edinsights.core.render import render
@@ -463,7 +464,7 @@ def heatmap_dashboard(request):
 # @query(name="process_data_ajax")
 def process_data_ajax(request, index):
     print index
-    mongodb = get_db()	
+    mongodb = get_db()
     start_time = time.time()
     record_segments_ajax(mongodb, int(index))
     #record_heatmaps_ajax(mongodb, int(index))
@@ -477,7 +478,7 @@ def process_data_ajax(request, index):
 # @query(name="process_heatmaps_ajax")
 def process_heatmaps_ajax(request, index):
     print index
-    mongodb = get_db()	
+    mongodb = get_db()
     start_time = time.time()
     #record_segments_ajax(mongodb, int(index))
     record_heatmaps_ajax(mongodb, int(index))
@@ -490,13 +491,13 @@ def process_heatmaps_ajax(request, index):
 
 # @query(name="export_heatmaps")
 def export_heatmaps(request):
-    mongodb = get_db()	
+    mongodb = get_db()
     import os
     collection = mongodb[HEATMAPS_COL]
     entries = list(collection.find())
     for index, entry in enumerate(entries):
         with open("edxmodules/video_analytics/mongo-data/video_heatmaps_0812_" + HEATMAPS_COL + "_" + str(index) + ".json", "w+") as outfile:
-            json.dump(entry, outfile, default=json_util.default, indent=0)    
+            json.dump(entry, outfile, default=json_util.default, indent=0)
         print index, "done"
     return HttpResponse(len(entries) + " items written to " + os.path.abspath(outfile.name))
 
@@ -509,14 +510,14 @@ def test(request):
     """
     for index, entry in enumerate(entries):
         try:
-            #json.dumps(entry, cls=MongoAwareEncoder)    
-            json.dumps(entry, default=json_util.default)    
+            #json.dumps(entry, cls=MongoAwareEncoder)
+            json.dumps(entry, default=json_util.default)
             #for key in entry:
             #    print key, entry[key]
         except TypeError:
             if index % 100 == 0:
                 for key in entry:
-                    print key, json.dumps(entry[key]) 
+                    print key, json.dumps(entry[key])
     """
         #print json.dumps(entry)
     # For incremental updates, retrieve only the events not processed yet.
