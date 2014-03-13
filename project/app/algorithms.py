@@ -1,5 +1,5 @@
 # Kernel estimation for heatmap smoothing
-# from scipy.stats import skew, kurtosis 
+# from scipy.stats import skew, kurtosis
 def get_kde(points, frac_val=0.02):
     import numpy as np
     import statsmodels.api as sm
@@ -69,7 +69,7 @@ def detect_peaks(data, tau=2):
             end = i
             while i < len(bins) and bins[i] > bins[start]:
                 # until the bin counts are back at the level they started
-                if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]: 
+                if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]:
                     # another significant rise found, so quit the downhill climbing
                     #print "another hill", i
                     i = i - 1
@@ -81,7 +81,8 @@ def detect_peaks(data, tau=2):
                     end = i
                     i = i + 1
 
-            windows.append([start, peak, end, int(rise_rate*100)])
+            #windows.append([start, peak, end, int(rise_rate*100)])
+            windows.append({"start": start, "top": peak, "end": end, "score": int(rise_rate*100), "type": "interaction", "label": ""})
             #print "window added", start, peak, end
         else:
             [mean, meandev] = detect_peaks_update(mean, meandev, bins[i])
@@ -111,9 +112,9 @@ def detect_peaks(data, tau=2):
 #         st["skew"] = skew(kde[:,1][peak[0]:end])
 #         st["kurt"] = kurtosis(kde[:,1][peak[0]:end])
 #         stats_data[str(peak[1])] = st
-        
-#         #print format_time(peak[0]), format_time(peak[1]), format_time(peak[2]), 
-#         #print "T:", peak[3], "W:", st["peak_width"], "H:", int(st["peak_height"]), "A:", int(st["peak_area"]), 
+
+#         #print format_time(peak[0]), format_time(peak[1]), format_time(peak[2]),
+#         #print "T:", peak[3], "W:", st["peak_width"], "H:", int(st["peak_height"]), "A:", int(st["peak_area"]),
 #         #print "NW:", "%.2f" % st["peak_norm_width"], "NH:", "%.2f" % st["peak_norm_height"], "NA:", "%.2f" % st["peak_norm_area"],
 #         #print "skew:", "%.2f" % st["skew"], "kurt:", "%.2f" % st["kurt"]
 #     return [peaks, stats_data]
@@ -130,7 +131,7 @@ def detect_peaks_org(data):
     import numpy
     import math
     bins = data["pause_counts"]
-    
+
     P = 5
     TAU = 4
 
@@ -158,7 +159,7 @@ def detect_peaks_org(data):
             end = i
             while i < len(bins) and bins[i] > bins[start]:
                 # until the bin counts are back at the level they started
-                if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]: 
+                if math.fabs(bins[i] - mean) / meandev > TAU and bins[i] > bins[i-1]:
                     # another significant rise found, so quit the downhill climbing
                     print "another hill", i
                     i = i - 1

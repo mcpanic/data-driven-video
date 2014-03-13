@@ -78,7 +78,7 @@
 
     <section id="play-vis">
         <div id="leftpane">
-            <h3>Video</h3>
+            <!-- <h3>Video</h3> -->
             <!-- <h3 id="subgoal">&nbsp;</h3> -->
                  <!-- <video id="vid3" src="" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
                 </video> -->
@@ -146,6 +146,22 @@
                 <div><a class="" href="#" data-mode="play_kde">smoothed</a></div>
             </div>
             <div id="timeline"></div>
+        </div>
+
+        <div id="rightpane"> <!-- sidebar-2 -->
+            <!-- <h3>Transcript</h3> -->
+            <div id="transcript"></div>
+            <!-- <div id="transcript-scroll"></div> -->
+        </div>
+
+        <div id="bottompane"> <!-- sidebar-1 -->
+<!--                 <h3>Highlights
+                <small>(<span id="highlight-count"></span>)</small>
+            </h3> -->
+                    <!-- <input type="checkbox"/>Visual transitions<br/>
+                    <input type="checkbox"/>Topic transitions<br/><br/>
+                    <input type="hidden" value="40" id="slider1"/> -->
+
             <div id="bookmark">
                 <button id="add-bookmark-button">Add Highlight</button>
                 <div id="bookmark-thumbnail"></div>
@@ -154,32 +170,22 @@
                 <button id="save-bookmark-button">Save</button>
                 <button id="cancel-bookmark-button">Cancel</button>
             </div>
-        </div>
-        <div id="sidebar-1">
-            <h3>Highlights
-                <small>(<span id="highlight-count"></span>)</small>
-                <div class="highlight-checkboxes">
-                    <input class="from-me" type="checkbox" checked/>
-                    <span class="by-me"></span>
-                    <label>by me</label>
-                    <input class="from-others" type="checkbox" checked/>
-                    <span class="by-others"></span>
-                    <label>by others</label>
-                    <!-- <input type="checkbox"/>Visual transitions<br/>
-                    <input type="checkbox"/>Topic transitions<br/><br/>
-                    <input type="hidden" value="40" id="slider1"/> -->
-                    <span>&nbsp;</span>
-                </div>
-            </h3>
+
+            <div class="highlight-checkboxes">
+                <input class="from-me" type="checkbox" value="from-me-val" checked/>
+                <!-- <span class="by-me"></span> -->
+                <label for="from-me-val">by me</label>
+                <input class="from-others" type="checkbox" value="from-others-val" checked/>
+                <!-- <span class="by-others"></span> -->
+                <label for="from-others-val">by others</label>
+                <span>&nbsp;</span>
+            </div>
             <div id="highlights">
             </div>
         </div>
-        <div id="sidebar-2">
-            <h3>Transcript</h3>
-            <div id="transcript"></div>
-            <!-- <div id="transcript-scroll"></div> -->
-        </div>
+
     </section>
+
 
     <section id="time-vis">
         <h3>Views Over Time</h3>
@@ -196,6 +202,7 @@
 
     <script src="{% static 'app/js/common.js' %}"></script>
     <script src="{% static 'app/myplayer/Player.js' %}"></script>
+    <script src="{% static 'app/myplayer/Peak.js' %}"></script>
     <script src="{% static 'app/myplayer/Timeline.js' %}"></script>
     <script src="{% static 'app/myplayer/Highlight.js' %}"></script>
     <script src="{% static 'app/myplayer/Transcript.js' %}"></script>
@@ -206,7 +213,7 @@
     var player;
     var options = {};
     var duration = 0;
-    var visWidth = 540;
+    var visWidth = 748; //540;
     var visHeight = 80; // 80
     var video_id = "{{ video_id }}";
     var videoUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
@@ -226,7 +233,8 @@
         Timeline.init(visWidth, visHeight);
         duration = getDuration(video_id);
         $("#duration-display").text(" / " + formatSeconds(duration));
-        Highlight.init(peaks);
+        Peak.init(peaks, []);
+        Highlight.init();
         // $("#timeline").css("margin-top", visHeight + "px");
         init();
         // var curMargin = parseInt($(".chart").css("margin-top"));

@@ -20,6 +20,7 @@ var Player = function ($, window, document) {
     function init(videoUrl) {
         bindEvents();
         load(videoUrl);
+        muteButton.click();
     }
 
     function load(videoUrl) {
@@ -141,7 +142,7 @@ var oldVolume = 0.0;
     function seekBarChangeHandler(){
         // Calculate the new time
         var time = video.duration * (seekBar.value / 100);
-        console.log(time);
+        // console.log(time);
         // Update the video time
         video.currentTime = time;
     }
@@ -238,7 +239,7 @@ var currentTopic;
         // slow down for hills
         if (isPlayUntil){
             var adjustedSpeed;
-            if (Highlight.isPeak(video.currentTime)){
+            if (Peak.isPeak(video.currentTime)){
                 adjustedSpeed = Math.max(1, video.playbackRate / 4);
                 console.log("PEAK ALERT", adjustedSpeed);
                 // trigger only for the first time

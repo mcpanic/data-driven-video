@@ -2,10 +2,16 @@
 
 // load and process text transcript
 var Transcript = function ($, window, document) {
-    var srt;
+    var srt; // raw subtitle
+    var subtitles = {}; // parsed, segmented subtitle object array
+    var orderedTimeIndices = [];
     var api;
     var isScrollLocked = false;
     var scrollLockCount = 0;
+    // run scrollTo() not every time, but only when above threshold.
+    // this means it's running once every "threshold" times.
+    var scrollTrigger = 0;
+    var scrollThreshold = 3;
     function init(transcriptUrl) {
         $.ajax(transcriptUrl)
             .done(function (data) {
@@ -13,20 +19,7 @@ var Transcript = function ($, window, document) {
                 srt = data;
                 parseSRT();
                 bindEvents();
-                setTimeout(function () {
-                    // delay in srt display cause premature scrollbar,
-                    // so wait a couple seconds until everything is ready.
-                    $('#transcript').jScrollPane({
-                        animateScroll: true
-                    });
-                    api = $('#transcript').data('jsp');
-                    $(".jspPane").on("mousedown mousewheel", function () {
-                        // console.log("manual");
-                        isScrollLocked = true;
-                        scrollLockCount = 0;
-                    });
-                    setInterval(checkScroll, 3000);
-                }, 2000);
+                addScrollbar();
 
             })
             .fail(function () {
@@ -46,6 +39,32 @@ var Transcript = function ($, window, document) {
         // s.addEventListener('keydown', find , false);
         // s.addEventListener('keyup', searchHandler, false);
     }
+
+
+    function addScrollbar() {
+        setTimeout(function () {
+            // delay in srt display cause premature scrollbar,
+            // so wait a couple seconds until everything is ready.
+            $('#transcript').jScrollPane({
+                animateScroll: true
+            });
+            api = $('#transcript').data('jsp');
+            $("#transcript .jspPane").on("mousedown mousewheel", function () {
+                // console.log("pane moved");
+                isScrollLocked = true;
+                scrollLockCount = 0;
+            });
+            $("#transcript .jspVerticalBar").on("click mousewheel", function () {
+                // console.log("bar moved");
+                isScrollLocked = true;
+                scrollLockCount = 0;
+                // e.stopPropagation();
+                // return false;
+            });
+            setInterval(checkScroll, 3000);
+        }, 500);
+    }
+
 
     // unlock scroll if no scroll for 5 seconds && in current viewport
     function checkScroll() {
@@ -100,9 +119,111 @@ var Transcript = function ($, window, document) {
     }
 
 
+    // see if the given text contains end of sentence markers.
+    // . ! ? are valid EOS markers.
+    // optionally, there can be quotes at the end
+    function containsEOS(text) {
+        return text.match(/[.!?]['\"]?/gi) !== null;
+    }
+
+
+    // for the given time in the transcript,
+    // return the beginning timestamp of the current sentence.
+    // Algorithm:
+    // if first item in the transcript, return current
+    // if not, recursively traverse up until end of sentence found (eos).
+    //     return the immediate next one following eos
+    function getSentenceStart(second) {
+        var foundIndex = -1;
+        var i;
+        var index = orderedTimeIndices.indexOf(second);
+        if (index === -1) {
+            // not found
+            return -1;
+        } else if (index === 0) {
+            // first item
+            return 0;
+        } else {
+            // console.log("found", index);
+            for (i = index - 1; i >= 0; i--) {
+                // console.log(i);
+                var curTime = orderedTimeIndices[i];
+                var text = subtitles[curTime].t;
+                if (containsEOS(text)) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+            if (foundIndex === -1) {
+                return 0; // everything from the beginning
+            } else {
+                // the one after the EOS is where the sentence begins.
+                // TODO: what if the transcript has EOS in the middle?
+                return foundIndex + 1;
+            }
+        }
+    }
+
+    // for the given time in the transcript,
+    // return the end timestamp of the current sentence.
+    // Algorithm:
+    // if current one has EOS, return current
+    // if not, recursively traverse down until EOS found.
+    //     return the one with eos
+    function getSentenceEnd(second) {
+        var foundIndex = -1;
+        var i;
+        var index = orderedTimeIndices.indexOf(second);
+        if (index === -1) {
+            // not found
+            return -1;
+        } else {
+            for (i = index; i < orderedTimeIndices.length; i++) {
+                // console.log(i);
+                var curTime = orderedTimeIndices[i];
+                var text = subtitles[curTime].t;
+                if (containsEOS(text)) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+            if (1 === orderedTimeIndices.length) {
+                return orderedTimeIndices.length - 1; // last one
+            } else {
+                // TODO: what if the transcript has EOS in the middle?
+                return foundIndex;
+            }
+        }
+    }
+
+
+    // for the given time in the transcript,
+    // return the sentence range including that moment.
+    // return format: {"start": second, "end": second, "text": full_sentence_text_concatenated}
+    //
+    //
+    function getSentenceBoundary(second) {
+        var start;
+        var end;
+        var text = "";
+        var i;
+        // TODO: do something smarter
+        if (second in subtitles) {
+            start = subtitles[second].i;
+            end = subtitles[second].o;
+            text = subtitles[second].t;
+        }
+        return {"start": start, "end": end, "text": text};
+    }
+
     function update(second) {
         highlightSentence(second);
-        scrollTo(second);
+        // console.log(scrollTrigger);
+        scrollTrigger += 1;
+        if (scrollTrigger % scrollThreshold === 0) {
+            scrollTrigger = 0;
+            scrollTo(second);
+        }
     }
 
 
@@ -121,6 +242,87 @@ var Transcript = function ($, window, document) {
         Highlight.displayPeaks(peaks);
         $(".search-cancel").addClass("hide");
     }
+
+
+    function formatSearchData(timemarks, term) {
+        // add Gaussian and convolution to the timeline
+        var searchData = [];
+        console.log(timemarks);
+        var i;
+        for(i = 0; i < duration; i++) {
+            searchData[i] = 100;
+        }
+
+        // detect sentence boundaries
+        // TODO: error checking
+        var curTime;
+        var foundStartIndex;
+        var foundEndIndex;
+        var foundStartTime;
+        var foundEndTime;
+        var foundStartTimeInt;
+        var foundEndTimeInt;
+        var foundTopTimeInt;
+        var searchPeakObj;
+        Peak.searchPeaks = [];
+        for (i in timemarks) {
+            curTime = timemarks[i];
+            foundStartIndex = getSentenceStart(curTime);
+            if (foundStartIndex === -1)
+                continue;
+            foundEndIndex = getSentenceEnd(curTime);
+            if (foundEndIndex === -1)
+                continue;
+            foundStartTime = orderedTimeIndices[foundStartIndex];
+            if (!(foundStartTime in subtitles))
+                continue;
+            foundEndTime = orderedTimeIndices[foundEndIndex];
+
+            // add distribution
+            var foundStartTimeInt = parseInt(subtitles[foundStartTime].i);
+            var foundEndTimeInt = parseInt(subtitles[foundEndTime].o);
+            var foundTopTimeInt = parseInt(timemarks[i]);
+            // console.log(foundStartTimeInt, foundTopTimeInt, foundEndTimeInt, timemarks[i], parseFloat(timemarks[i]));
+            // uphill
+            var unit = 0;
+            for (var j = foundStartTimeInt; j <= foundTopTimeInt; j++) {
+                if (foundTopTimeInt === foundStartTimeInt)
+                    unit = 300;
+                else
+                    unit = 300 / (foundTopTimeInt - foundStartTimeInt);
+                searchData[j] += unit * (j - foundStartTimeInt + 1);
+            }
+            // downhill
+            for (var j = foundTopTimeInt + 1; j <= foundEndTimeInt; j++) {
+                // if (foundTopTimeInt === foundEndTimeInt)
+                //     unit = 0;
+                // else
+                unit = 300 / (foundEndTimeInt - foundTopTimeInt);
+                searchData[j] += unit * (foundEndTimeInt - j + 1);
+            }
+
+            searchPeakObj = {
+                // "start": foundStartTimeInt,
+                // "end": foundEndTimeInt,
+                // "top": foundTopTimeInt,
+                "start": subtitles[foundStartTime].i,
+                "end": subtitles[foundEndTime].o,
+                "top": timemarks[i],
+                "type": "search",
+                "label": term,
+                "score": 100
+            }
+            Peak.searchPeaks.push(searchPeakObj);
+            // console.log(searchPeakObj);
+        }
+        // Warning: these two lines should not be apart from Peak.searchPeaks.push
+        // since UID might get messed up. We're batch-assigning IDs.
+        Peak.searchPeaks.sort(Peak.sortPeaksByTime);
+        Peak.assignSearchUID();
+        console.log(searchData);
+        return searchData;
+    }
+
 
     function searchKeyupHandler(e) {
         var s = document.querySelector('input.search-bar');
@@ -172,9 +374,12 @@ var Transcript = function ($, window, document) {
                 if(word.toLowerCase().indexOf(term) !== -1) {
                     count++;
                     words[i] = "<span class='search-found'>" + word + "</span>";
+                    var second = $(p[j]).closest(".transcript-entry").attr("data-second");
+                    // timemarks.push(parseInt(second));
+                    timemarks.push(second);
                 }
-                else{
-                }
+                // else{
+                // }
             }
             p[j].innerHTML = words.join(' ');
         }
@@ -183,7 +388,7 @@ var Transcript = function ($, window, document) {
         // var oh = $("#transcript").height();
         // var oh = document.querySelector('#transcript').offsetHeight;
         // entire div height
-        var sh = document.querySelector('.jspContainer').scrollHeight;
+        var sh = document.querySelector('#transcript .jspContainer').scrollHeight;
         // var scrollRatio =  oh / sh;
         // scroll bar height
         // var bh = scrollRatio * oh;
@@ -196,46 +401,32 @@ var Transcript = function ($, window, document) {
                 // .css("top", (this.offsetTop - transcriptTop) * scrollRatio)
                 // .css("top", (this.offsetTop - transcriptTop) * 100 / sh + "%")
                 .css("top", this.offsetTop * 100 / sh + "%")
-                .appendTo(".jspVerticalBar");
+                .appendTo("#transcript .jspVerticalBar");
                 // .appendTo("#transcript-scroll");
             // var scrollTopPosition = $(this).position().top * scrollRatio;
             // document.querySelector("html").scrollHeight
             // document.querySelector("html").clientHeight
+        });
 
-            // add ticks to the timeline
-            var second = $(this).closest(".transcript-entry").attr("data-second");
-            var xPos = second / duration * 100 - 8 * 100 / visWidth;
+        var searchData = formatSearchData(timemarks, term);
+        Timeline.drawPlayVis(searchData, duration);
+
+        // add ticks to the timeline
+        for (var i in Peak.searchPeaks) {
+            var peak = Peak.searchPeaks[i];
+            var xPos = parseInt(peak["top"]) / duration * 100 - 8 * 100 / visWidth;
             $("<div/>")
                 .addClass("timeline-result by-search")
-                .attr("id", "timeline-search-" + second)
-                .data("second", second)
-                .data("summary", term)
+                .attr("id", "timeline-search-" + peak["uid"]) // id cannot have periods in the middle
+                .data("uid", peak["uid"])
+                .data("second", peak["top"])
+                .data("start", peak["start"])
+                .data("end", peak["end"])
+                .data("score", peak["score"])
+                .data("label", peak["label"])
                 .css("left", xPos + "%")
                 .appendTo("#timeline");
-
-            timemarks.push(parseInt(second));
-        });
-        // add Gaussian and convolution to the timeline
-        var searchData = [];
-        console.log(timemarks);
-        for(var i = 0; i < duration; i++) {
-            searchData[i] = 100;
         }
-        for(var i = 0; i < duration; i++) {
-            if ($.inArray(i, timemarks) > -1) {
-                searchData[i] += 500;
-                searchData[i+1] += 400;
-                searchData[i+2] += 300;
-                searchData[i+3] += 200;
-                searchData[i+4] += 100;
-                searchData[i-1] += 400;
-                searchData[i-2] += 300;
-                searchData[i-3] += 200;
-                searchData[i-4] += 100;
-            }
-        }
-        console.log(searchData);
-        Timeline.drawPlayVis(searchData, duration);
 
         $(".search-summary").text(count + " results found on ");
 
@@ -251,10 +442,11 @@ var Transcript = function ($, window, document) {
     function toSeconds(t) {
         var s = 0.0;
         if(t) {
-                var p = t.split(':');
-                var i;
-                for(i=0;i<p.length;i++)
-                    s = s * 60 + parseFloat(p[i].replace(',', '.'));
+            var p = t.split(':');
+            var i;
+            for(i=0;i<p.length;i++)
+                s = s * 60 + parseFloat(p[i].replace(',', '.'));
+                s = s.toFixed(2);
         }
         return s;
     }
@@ -269,14 +461,14 @@ var Transcript = function ($, window, document) {
         // subtitleElement.text('');
         srt = srt.replace(/\r\n|\r|\n/g, '\n');
         // console.log(srt);
-        var subtitles = {};
+        // var subtitles = {};
         srt = strip(srt);
         // console.log(srt);
         var srt_ = srt.split('\n\n');
         var s, n, i, o, t, j, is, os;
         for (s in srt_) {
             var st = srt_[s].split('\n');
-            if(st.length >=2) {
+            if(st.length >= 2) {
                 // console.log(st);
                 n = st[0];
                 i = strip(st[1].split(' --> ')[0]);
@@ -291,12 +483,14 @@ var Transcript = function ($, window, document) {
                 is = toSeconds(i);
                 os = toSeconds(o);
                 subtitles[is] = {i:is, o: os, t: t};
+                orderedTimeIndices.push(is);
                 $("#transcript").append("<div class='transcript-entry' data-second='" + is + "'><span class='transcript-time'>" + formatSeconds(is) + "</span>" + "<span class='transcript-text'>" + t + "</span></div>");
             }
         }
 
+        orderedTimeIndices.sort(function(a,b) { return a - b;});
         console.log(subtitles);
-
+        console.log(orderedTimeIndices);
         // var currentSubtitle = -1;
         // var ival = setInterval(function () {
         //   var currentTime = document.getElementById(videoId).currentTime;
@@ -321,6 +515,7 @@ var Transcript = function ($, window, document) {
         init: init,
         scrollTo: scrollTo,
         highlightSentence: highlightSentence,
+        getSentenceBoundary: getSentenceBoundary,
         update: update
     }
 }(jQuery, window, document);
