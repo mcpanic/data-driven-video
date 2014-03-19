@@ -241,6 +241,7 @@ var Transcript = function ($, window, document) {
         $("#vis-options a").eq(6).trigger("click");
         Highlight.displayPeaks(peaks);
         $(".search-cancel").addClass("hide");
+        Peak.searchPeaks = [];
     }
 
 

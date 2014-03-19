@@ -29,6 +29,9 @@ var Highlight = function ($, window, document) {
     }
 
     function bindEvents() {
+        // should this belong here?
+        $(document).on("click", ".trace", traceClickHandler);
+
         $(document).on("click", ".timeline-peak", timelinePeakClickHandler);
         $(document).on("mouseenter", ".timeline-peak", timelinePeakMouseenterHandler);
         $(document).on("mouseleave", ".timeline-peak", timelinePeakMouseleaveHandler);
@@ -40,8 +43,13 @@ var Highlight = function ($, window, document) {
         $(document).on("click", "#save-bookmark-button", saveBookmarkButtonClickHandler);
         $(document).on("click", "#cancel-bookmark-button", cancelBookmarkButtonClickHandler);
         $(document).on("click", ".highlight-checkboxes label", checkboxClickHandler);
-
+        // $(document).on("mouseenter", "#bookmark-popup", function(e){ e.preventDefault(); $(this).css("z-index", 3000); console.log("prevent"); return false;});
     }
+
+    function traceClickHandler() {
+        Player.seekTo($(this).data("start"));
+    }
+
 
     function isInteractionShown() {
         return $("input.from-others").is(":checked");
@@ -131,6 +139,7 @@ var Highlight = function ($, window, document) {
     }
 
     function hideBookmarkPanel(){
+            $("#bookmark-popup").hide();
             $("#add-bookmark-button").removeAttr("disabled");
             // $("#bookmark-thumbnail img").attr("src", "");
             $("#bookmark-thumbnail").empty();
@@ -183,10 +192,14 @@ var Highlight = function ($, window, document) {
         var curTime = parseInt(Player.getCurrentTime());
         // var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + curTime + '.jpg';
         var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + curTime + '.jpg';// console.log(curTime, imgPath);
-        if (!$(this).is(":disabled")){
-            $(this).attr("disabled", "disabled");
+        // if (!$(this).is(":disabled")){
+            // $(this).attr("disabled", "disabled");
+        if ($("#bookmark-popup").is(":visible")) {
+            hideBookmarkPanel();
+        } else {
             $(this).data("curTime", curTime);
             $("<img/>").attr("src", imgPath).appendTo("#bookmark-thumbnail");
+            $("#bookmark-popup").show();
             $("#bookmark-thumbnail").show();
             $("#bookmark-description").show();
             $("#save-bookmark-button").show();
@@ -287,9 +300,25 @@ var Highlight = function ($, window, document) {
                 .data("label", peaks[index]["label"])
                 .css("left", xPos + "%")
                 .appendTo("#timeline");
+
         }
         updatePeaks(peaks, 0);
+        updatePeakColor();
         // updateTimeline(0);
+    }
+
+    // color the rollercoaster graph
+    function updatePeakColor() {
+        if (!isInteractionShown())
+            return;
+        for (var index in Peak.interactionPeaks){
+            var j;
+            for (j = peaks[index]["start"]; j <= peaks[index]["end"]; j++) {
+                console.log(j, $(".databar[data-second='" + j + "']").length);
+                console.log(j, $(".databar[data-second='" + parseInt(j) + "']").length);
+                $(".databar[data-second='" + j + "']").attr("class", "databar peak-databar");
+            }
+        }
     }
 
     return {
@@ -297,6 +326,7 @@ var Highlight = function ($, window, document) {
         // isPeak: isPeak,
         displayPeaks: displayPeaks,
         updateScreenshot: updateScreenshot,
+        updatePeakColor: updatePeakColor,
         api: api
     }
 }(jQuery, window, document);

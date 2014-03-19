@@ -17,6 +17,15 @@ var Player = function ($, window, document) {
     var isPlayUntil = false;
     var playUntilTime = 0;
 
+    var oldVolume = 0.0;
+
+    var lastTimeUpdate = -1000; // force trigger the first time
+    var isPeak = false;
+
+    var traces = []; // personal interaction traces
+    // var isSegmentOn = false; // flag for keeping track of watching segments
+    var tid = 1;    // trace count used as ID
+
     function init(videoUrl) {
         bindEvents();
         load(videoUrl);
@@ -26,20 +35,71 @@ var Player = function ($, window, document) {
     function load(videoUrl) {
         video.src = videoUrl;
         video.load();
-        video.play();
+        play();
     }
 
     function seekTo(time) {
         video.currentTime = time;
+        // traces.push({
+        //     "type": "seek",
+        //     "vtime": getCurrentTime(),
+        //     "time": new Date(),
+        //     "processed": false
+        // });
+        // if (!isSegmentOn)
+        //     isSegmentOn = true;
+        // addSegment();
     }
 
     function getCurrentTime() {
         return video.currentTime;
     }
 
+    function addSegment() {
+        var start;
+        var end;
+        var segStart;
+        var segEnd;
+        for (var i = 0; i < traces.length; i++) {
+            if (!traces[i]["processed"] && traces[i]["type"] == "play"){
+                start = traces[i];
+                // if the last one, return because it's still waiting for end
+                if (i == traces.length - 1)
+                    return;
+                end = traces[i + 1];
+                break;
+            }
+        }
+        console.log("TRACE", start, end, getTimeDiff(end["time"], start["time"]));
+        start["processed"] = true;
+        // add the segment to the timeline
+        if (end["type"] == "pause") {
+            console.log("play-pause", start["vtime"], end["vtime"]);
+            segStart = start["vtime"];
+            segEnd = end["vtime"];
+            end["processed"] = true;
+        } else if (end["type"] == "play") {
+            console.log("play-play", start["vtime"], start["vtime"] + getTimeDiff(end["time"], start["time"]));
+            segStart = start["vtime"];
+            segEnd = start["vtime"] + getTimeDiff(end["time"], start["time"]);
+        }
+        Timeline.addSegment(segStart, segEnd, tid);
+        tid += 1;
+        // isSegmentOn = false;
+    }
+
     function play() {
         video.play();
         $(playButton).removeClass("play-display").addClass("pause-display");
+        traces.push({
+            "type": "play",
+            "vtime": getCurrentTime(),
+            "time": new Date(),
+            "processed": false
+        });
+        // if (!isSegmentOn)
+        //     isSegmentOn = true;
+        addSegment();
     }
 
     function playUntil(newTime, speed) {
@@ -48,7 +108,7 @@ var Player = function ($, window, document) {
         console.log("play until started", video.currentTime, playUntilTime, speed);
         // play();
         // ensure moving at least at 1x
-        var adjustedSpeed = Math.max(1, speed);
+        var adjustedSpeed = Math.max(0.5, speed);
         if (video.currentTime + adjustedSpeed > playUntilTime)
             video.currentTime = playUntilTime;
         else
@@ -58,6 +118,15 @@ var Player = function ($, window, document) {
     function pause() {
         video.pause();
         $(playButton).removeClass("pause-display").addClass("play-display");
+        traces.push({
+            "type": "pause",
+            "vtime": getCurrentTime(),
+            "time": new Date(),
+            "processed": false
+        });
+        // if (!isSegmentOn)
+        //     isSegmentOn = true;
+        addSegment();
     }
 
     function changeSpeed(rate) {
@@ -88,7 +157,7 @@ var Player = function ($, window, document) {
         }
     }
 
-var oldVolume = 0.0;
+
 
     // Event listener for the mute button
     function muteButtonClickHandler(){
@@ -152,61 +221,11 @@ var oldVolume = 0.0;
     }
 
 
-var topics = [
-    {"start": 0, "end": 30, "keywords":[
-        {"label": "function", "importance": "high"},
-        {"label": "computation", "importance": "medium"},
-        {"label": "primitive", "importance": "low"}
-        ]
-    },
-    {"start": 31, "end": 60, "keywords":[
-        {"label": "loop", "importance": "high"},
-        {"label": "construct", "importance": "high"},
-        {"label": "bit", "importance": "low"}
-        ]
-    },
-    {"start": 61, "end": 150, "keywords":[
-        {"label": "iterate", "importance": "high"},
-        {"label": "variable", "importance": "medium"},
-        {"label": "state", "importance": "medium"}
-        ]
-    },
-    {"start": 151, "end": 305, "keywords":[
-        {"label": "result", "importance": "high"},
-        {"label": "variable", "importance": "high"},
-        {"label": "initialization", "importance": "low"}
-        ]
-    }
 
-
-
-];
-
-var lastTimeUpdate = -1000; // force trigger the first time
-var currentTopic;
-
-    function displayTopics(currentTime){
-        var i, j;
-        var $topic;
-        $("#current-topic").empty();
-        for (i in topics){
-            if (currentTime >= topics[i]["start"] && currentTime <= topics[i]["end"]){
-                currentTopic = topics[i];
-                // console.log("topic match", currentTopic);
-                for (j in currentTopic["keywords"]){
-                    $topic = $("<span>").text(currentTopic["keywords"][j]["label"]).addClass("topic " + currentTopic["keywords"][j]["importance"]);
-                    $("#current-topic").append($topic);
-                    // console.log("adding", currentTopic["keywords"][j]["label"]);
-                }
-            }
-        }
-    }
-
-    var isPeak = false;
     // Update the seek bar as the video plays
     function videoTimeUpdateHandler() {
-        if (isPlayUntil)
-            console.log("update", video.currentTime, video.playbackRate);
+        // if (isPlayUntil)
+        //     console.log("update", video.currentTime, video.playbackRate);
         // Calculate the slider value
         var value = (100 / video.duration) * video.currentTime;
         var intCurrentTime = parseInt(video.currentTime);
@@ -223,13 +242,13 @@ var currentTopic;
             lastTimeUpdate = intCurrentTime;
             // console.log("checking");
 
-            if (typeof currentTopic === "undefined") {
+            if (typeof Topicflow.currentTopic === "undefined") {
                 console.log("first time");
-                displayTopics(intCurrentTime);
+                Topicflow.displayTopics(intCurrentTime);
             } else {
-                if (intCurrentTime <= currentTopic["start"] || intCurrentTime >= currentTopic["end"]){
+                if (intCurrentTime <= Topicflow.currentTopic["start"] || intCurrentTime >= Topicflow.currentTopic["end"]){
                     console.log("topic changed");
-                    displayTopics(intCurrentTime);
+                    Topicflow.displayTopics(intCurrentTime);
                 }
             }
 
@@ -240,7 +259,7 @@ var currentTopic;
         if (isPlayUntil){
             var adjustedSpeed;
             if (Peak.isPeak(video.currentTime)){
-                adjustedSpeed = Math.max(1, video.playbackRate / 4);
+                adjustedSpeed = video.playbackRate / 4; // Math.max(0.5, video.playbackRate / 4);
                 console.log("PEAK ALERT", adjustedSpeed);
                 // trigger only for the first time
                 if (isPeak == false){
@@ -251,7 +270,7 @@ var currentTopic;
                         video.currentTime += adjustedSpeed;
                 } else {
                     // normal dragging: move a bit.
-                    adjustedSpeed = Math.max(1, video.playbackRate);
+                    adjustedSpeed = video.playbackRate; // Math.max(0.5, video.playbackRate);
                     changeSpeed(adjustedSpeed);
                     if (video.currentTime + adjustedSpeed > playUntilTime)
                         video.currentTime = playUntilTime;
@@ -260,7 +279,7 @@ var currentTopic;
                 }
                 isPeak = true;
             } else {
-                adjustedSpeed = Math.max(1, video.playbackRate * 4);
+                adjustedSpeed = video.playbackRate * 4; // Math.max(0.5, video.playbackRate * 4);
                 // trigger only for the first time
                 if (isPeak == true){
                     console.log("jumping", adjustedSpeed);
@@ -271,7 +290,7 @@ var currentTopic;
                         video.currentTime += adjustedSpeed;
                 } else {
                     // normal dragging: move a bit.
-                    adjustedSpeed = Math.max(1, video.playbackRate);
+                    adjustedSpeed = video.playbackRate; //Math.max(0.5, video.playbackRate);
                     changeSpeed(adjustedSpeed);
                     if (video.currentTime + adjustedSpeed > playUntilTime)
                         video.currentTime = playUntilTime;
@@ -280,6 +299,13 @@ var currentTopic;
                 }
                 isPeak = false;
             }
+        }
+
+        // only when in the interaction peaks
+        if (Peak.isPeak(video.currentTime)) {
+            $(".playbar").attr("class", "playbar dragging peak");
+        } else {
+            $(".playbar").attr("class", "playbar");
         }
 
         if (isPlayUntil){
@@ -315,7 +341,11 @@ var currentTopic;
 
     function speedButtonClickHandler(){
         // $(speedButton).attr("data-speed")
-        $("#speed-dropdown").show();
+        if ($("#speed-dropdown").is(":visible")) {
+            $("#speed-dropdown").hide();
+        } else {
+            $("#speed-dropdown").show();
+        }
         console.log("clicked");
     }
 
@@ -334,6 +364,7 @@ var currentTopic;
     return {
         init: init,
         seekTo: seekTo,
+        traces: traces,
         getCurrentTime: getCurrentTime,
         pause: pause,
         play: play,

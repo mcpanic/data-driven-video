@@ -70,11 +70,11 @@ def player(request, vid):
     Example: http://localhost:9999/view/player?vid=2deIoNhqDsg
     """
     mongodb = get_db()
-    [data, peaks] = video_single_query(vid)
+    [data, peaks, vtran_data, vtran_peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
     return render(request, "app/player.html", {
-        'video_id': vid, 'data': data, 'videos': videos, 'peaks': peaks
+        'video_id': vid, 'data': data, 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks, 'videos': videos, 'peaks': peaks
     })
 
 
@@ -84,7 +84,7 @@ def prototype_interface(request, vid):
     Example: http://localhost:9999/view/prototype_interface?vid=2deIoNhqDsg
     """
     mongodb = get_db()
-    [data, peaks] = video_single_query(vid)
+    [data, peaks, vtran_data, vtran_peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
     return render(request, "app/prototype-view.html", {
@@ -100,7 +100,7 @@ def video_single(request, vid):
     Example: http://localhost:9999/view/video_single?vid=2deIoNhqDsg
     """
     mongodb = get_db()
-    [data, peaks] = video_single_query(vid)
+    [data, peaks, vtran_data, vtran_peaks] = video_single_query(vid)
     videos = video_info_query()
     # from edinsights.core.render import render
     return render(request, "app/single-view.html", {
@@ -129,8 +129,20 @@ def video_single_query(vid):
     Return heatmap information from the database for a single video.
     Example: http://localhost:9999/query/video_single?vid=2deIoNhqDsg
     """
+
+    import numpy as np
     mongodb = get_db()
     start_time = time.time()
+
+    collection = mongodb['visual_transition']
+    vtran_temp_data = list(collection.find({"vid": vid}))
+    vtran_data = vtran_temp_data[0]["visual_diff"]
+    # vtran_np_data = np.array(vtran_data)
+    # print vtran_data
+    # print vtran_data[:,1]
+    vtran_peaks_raw = detect_peaks(np.array(vtran_data)[:,1], 3, "vtran")
+    # print vtran_peaks
+    vtran_peaks = json.dumps(vtran_peaks_raw, default=json_util.default)
 
     # Quanta workshop
     collection = mongodb[HEATMAPS_COL]
@@ -147,7 +159,6 @@ def video_single_query(vid):
     #     entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
 
     if len(entries):
-        import numpy as np
         # First, smooth the points and run peak detection
         play_points = entries[0]["play_counts"]
         play_points[0] = 0
@@ -163,14 +174,14 @@ def video_single_query(vid):
         masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde))
         #print masked_play_kde, "max", np.max(masked_play_kde[:,1])
         play_kde = masked_play_kde
-        play_peaks = detect_peaks(play_kde[:,1], 3)
+        play_peaks_raw = detect_peaks(play_kde[:,1], 3, "interaction")
         entries[0]["play_kde"] = play_kde[:,1].tolist()
-        windows = json.dumps(play_peaks, default=json_util.default)
+        interaction_peaks = json.dumps(play_peaks_raw, default=json_util.default)
         result = json.dumps(entries[0], default=json_util.default)
     else:
         result = ""
     print sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
-    return [result, windows]
+    return [result, interaction_peaks, vtran_data, vtran_peaks]
 
 
 # @query(name="video_list")

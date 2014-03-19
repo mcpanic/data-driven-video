@@ -33,11 +33,11 @@ table {
 th, td {
     padding: 0.2em 1em;
 }
-tr:nth-child(odd) { 
-    background-color:#eee; 
+tr:nth-child(odd) {
+    background-color:#eee;
 }
-tr:nth-child(even) { 
-    background-color:#fff; 
+tr:nth-child(even) {
+    background-color:#fff;
 }
 section {
     display: none;
@@ -51,7 +51,7 @@ table.sortable th {
     -khtml-user-select: none;
     -moz-user-select: moz-none;
     -ms-user-select: none;
-    user-select: none;    
+    user-select: none;
 }
 table.sortable th:hover {
     color: steelblue;
@@ -84,10 +84,10 @@ table.sortable .sort-option {
 .substat {
     font-size: 0.8em;
     height: 1em;
-}  
+}
 .desc {
     font-size: 0.8em;
-}  
+}
 #tabs, #vis-options {
     /*background-color: #d6d6d6;*/
     background-color: #eee;
@@ -107,13 +107,13 @@ table.sortable .sort-option {
     color: steelblue;
 }
 #tabs a, #vis-options a {
-    margin: 0.5em;
+    /*margin: 0.5em;*/
     padding: 0.3em 1em;
     text-decoration: none;
 }
 #tabs a, #vis-options a {
     color: #2A2E40;
-}    
+}
 #tabs a.active, #vis-options a.active {
     /*background-color: #96A5E6;*/
     /*background-color: #6DBCDB;*/
@@ -133,8 +133,8 @@ table.sortable .sort-option {
     /*padding: 0 3em 2em 3em;*/
 }
 .chart rect{
-    fill: #888; /* teal */
-    stroke: #888;
+    fill: #bbb; /* teal */
+    stroke: #bbb;
     cursor: pointer;
 }
 .chart text{
@@ -143,15 +143,15 @@ table.sortable .sort-option {
     cursor: pointer;
 }
 .chart path{
-    stroke: steelblue;
-    stroke-width: 2;
+    /*stroke: steelblue;*/
+    stroke-width: 0;
     fill: none;
 }
 .chart .axis path,
 .chart .axis line {
     fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
+    /*stroke: black;
+    shape-rendering: crispEdges;*/
 }
 .chart .axis text {
     fill: black;
@@ -159,13 +159,13 @@ table.sortable .sort-option {
 
 .chart .playbar {
     stroke: #CD332D; /* #FFEBCD; */
-    stroke-width: 0.3em;
+    stroke-width: 0.4em;
 }
 
 .tooltip{
     font-size: 0.8em;
     background-color: #fff8dc;
     padding: 0.3em 0.5em;
-}    
+}
 
 

@@ -12,12 +12,14 @@
 
 var Peak = function ($, window, document) {
     var interactionPeaks = [];
+    var visualPeaks = [];
     var searchPeaks = [];
     var bookmarkPeaks = [];
 
-    function init(iPeaks, bPeaks) {
+    function init(iPeaks, vPeaks, bPeaks) {
         // TODO: handle server-generated bookmarks
         Peak.interactionPeaks = iPeaks;
+        Peak.visualPeaks = vPeaks;
         Peak.bookmarkPeaks = bPeaks;
         initUID();
         // console.log(interactionPeaks);
@@ -26,6 +28,9 @@ var Peak = function ($, window, document) {
     function initUID() {
         for (var i = 0; i < Peak.interactionPeaks.length; i++) {
             Peak.interactionPeaks[i]["uid"] = "i" + (i + 1);
+        }
+        for (var i = 0; i < Peak.visualPeaks.length; i++) {
+            Peak.visualPeaks[i]["uid"] = "v" + (i + 1);
         }
         for (var i = 0; i < Peak.bookmarkPeaks.length; i++) {
             Peak.bookmarkPeaks[i]["uid"] = "b" + (i + 1);

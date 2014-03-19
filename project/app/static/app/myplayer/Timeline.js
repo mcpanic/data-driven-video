@@ -8,18 +8,98 @@ var Timeline = function ($, window, document) {
     var h;
     var xScale;
     var yScale;
+    var isChartMouseDown = false;
 
     function init(visWidth, visHeight){
         w = visWidth;
         h = visHeight;
         xScale = d3.scale.linear().domain([0, duration]).range([0, w]);
         yScale = d3.scale.linear().domain([0, d3.max(data.play_kde)]).range([h, 0]);
+
+        // global to avoid losing correponding mouse up if it occurs outside the chart.
+        $(document).on("mouseup", mouseupHandler);
     }
 
     /* Move the player to the selected region to sync with the vis */
-    function rectClickHandler(d, i){
-        var second = Math.floor(d3.mouse(this)[0] * duration / visWidth);
+    function rectMousedownHandler(d, i){
+        isChartMouseDown = true;
+        console.log(isChartMouseDown);
+        // dragPlayheadMove(this);
+        //
+        console.log("DRAGGING", d3.event.dx);
+        $(".playbar").attr("class", "playbar dragging");
+        // console.log("mouse", d3.mouse(this));
+        // ignore micro dragging events
+        // if (d3.event.dx < 10 && d3.event.dx > -10)
+        //     return;
+        isDragging = true;
+        var chart = d3.selectAll("svg.play-chart");
+        var playhead = d3.selectAll("svg.play-chart .playhead");
+
+        var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
+        var newTime = parseInt(newX * duration / chart.attr("width"));
+        var newY = getAltitude(newTime);
+
+        // 2) determine speed based on the strength of the "rubber band"
+        var dx = newX - playhead.attr("cx");
+        var dy = newY - playhead.attr("cy");
+        // var force = dx*dx + dy*dy;
+        var force = dx*dx;
+        var speed = Math.min(16, force / 10000);
+        console.log("force", force, "speed", speed);
+
+        // 3) play a "quick" preview based on the speed from 2)
+        if (dx < 0)
+            speed = -1 * speed;
+        // console.log("play until", newTime);
+        Player.changeSpeed(speed / 2);
+        Player.playUntil(newTime, speed / 2);
+
+
+        // instead of directly jumping to that section,
+        // Player.seekTo(newTime);
+        var dragTrail = chart.selectAll(".dragtrail")
+            .data(["dragtrail"])
+            .attr("x1", playhead.attr("cx"))
+            .attr("x2", newX)
+            .attr("y1", playhead.attr("cy"))
+            .attr("y2", yScale(newY))
+            .attr("stroke-width", (speed * 2) + "px");
+        // 1) display the trail
+        dragTrail.enter().append("line")
+            .attr("class", "dragtrail");
+
+        // dragTrail.transition()
+        //     .duration(3000)
+            // .delay(500)
+            // .remove();
+            // .call(postDrag);
+
+        // console.log(d3.event, playhead.attr("cx"));
+        // console.log(newX, newY, currentTime);
+        // chart.selectAll(".playhead")
+     //        .transition()
+     //        .duration(0)
+        //     .attr("cx", newX)
+        //     .attr("cy", yScale(newY));
+        isDragging = false;
+    }
+
+    function mouseupHandler(e) {
+        console.log(isChartMouseDown, e, e.pageX, e.pageY);
+        if (!isChartMouseDown)
+            return;
+        isChartMouseDown = false;
+        var leftOffset = e.pageX - $("svg.chart").offset().left;
+        //var second = Math.floor(d3.mouse(e)[0] * duration / visWidth);
+        var second = Math.floor(leftOffset * duration / visWidth);
         Player.seekTo(second);
+        // var chart = d3.selectAll("svg.play-chart");
+        // chart.selectAll(".dragtrail")
+        //     .transition()
+        //     .duration(500)
+        //     .attr("opacity", 0)
+        //     .remove();
     }
 
     /* Progress the playhead as the video advances to the destinationTime mark. */
@@ -27,7 +107,8 @@ var Timeline = function ($, window, document) {
         var chart = d3.selectAll("svg.play-chart");
         var newY = getAltitude(destinationTime);
         var curPosition = chart.attr("width") * destinationTime / duration;
-        var dur = isDragging ? 1000 : 250;
+        // var dur = isDragging ? 1000 : 250;
+        var dur = 0;
         // move the playhead.
         chart.selectAll(".playhead")
             .transition()
@@ -90,6 +171,9 @@ var Timeline = function ($, window, document) {
         var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
         var newTime = parseInt(newX * duration / chart.attr("width"));
         var newY = getAltitude(newTime);
+
+        Player.seekTo(newTime);
+        return;
 
         // 2) determine speed based on the strength of the "rubber band"
         var dx = newX - playhead.attr("cx");
@@ -173,7 +257,7 @@ var Timeline = function ($, window, document) {
         // chart.append("svg:path")
         //     .data(dataset)
         //     .attr("d", line(dataset))
-        //     .on("click", rectClickHandler);
+        //     .on("click", rectMousedownHandler);
             // .on("mouseover", function(d, i){
             //     console.log(this, d, i);
             //     return tooltip.text("at " + formatSeconds(d.key) + " count: " + d.value).style("visibility", "visible");
@@ -184,17 +268,20 @@ var Timeline = function ($, window, document) {
             // .on("mouseout", function(d){
             //     return tooltip.style("visibility", "hidden");
             // });
-        chart.on("click", rectClickHandler);
+        chart.on("mousedown", rectMousedownHandler);
+
 
         // // Add histogram
         chart.selectAll("rect")
             .data(dataset)
             .enter().append("rect")
+            .attr("data-second", function(d, i){ return i; })
+            .attr("class", "databar")
             .attr("x", function(d, i){ return i * (w / dataset.length); })
             .attr("y", yScale)
             .attr("width", w / dataset.length - barPadding)
             .attr("height", function(d){ return h - yScale(d); });
-            // // .on("click", rectClickHandler)
+            // // .on("click", rectMousedownHandler)
             // .on("mouseover", function(d, i){
             //     return tooltip.text("at " + formatSeconds(i) + " count: " + d).style("visibility", "visible");
             // })
@@ -218,7 +305,7 @@ var Timeline = function ($, window, document) {
             .attr("class", "playhead")
             .attr("cx", 0)
             .attr("cy", yScale(dataset[0]))
-            .attr("r", 7)
+            .attr("r", 8)
             // .on("click", mousedownPlayheadMove)
             // .on("mousedown", mousedownPlayheadMove)
             .call(dragPlayhead);
@@ -317,7 +404,7 @@ var Timeline = function ($, window, document) {
             .attr("y", function(d){ return yScale(d.value[1]); })
             .attr("width", w / keys.length - barPadding)
             .attr("height", function(d){ return h - yScale(d.value[1]); })
-            // .on("click", rectClickHandler)
+            // .on("click", rectMousedownHandler)
             .on("mouseover", function(d){
                 return tooltip.text(d.value[0] + ": " + d.value[1] + " views").style("visibility", "visible");
             })
@@ -353,13 +440,34 @@ var Timeline = function ($, window, document) {
         return chart;
     }
 
+    function addSegment(start, end, tid) {
+        var xPos = start/duration * 100;
+        var width = (end - start)/duration * 100;
+        $("<div/>")
+            .addClass("trace")
+            .attr("id", "trace-" + tid)
+            .data("sid", tid)
+            .data("start", start)
+            .data("end", end)
+            .css("left", xPos + "%")
+            .css("width", width + "%")
+            .appendTo("#timeline");
+
+        // opacity change only when there are more than 3 traces
+        for (var i = 3; i < tid; i++) {
+            var curOpacity = $("#trace-" + (i - 2)).css("opacity");
+            var newOpacity = curOpacity > 0.2 ? curOpacity - 0.2 : 0.2;
+            $("#trace-" + (i - 2)).css("opacity", newOpacity);
+        }
+    }
 
     return {
         init: init,
         getAltitude: getAltitude,
         movePlayhead: movePlayhead,
         drawPlayVis: drawPlayVis,
-        drawTimeVis: drawTimeVis
+        drawTimeVis: drawTimeVis,
+        addSegment: addSegment
     }
 
 }(jQuery, window, document);

@@ -12,21 +12,22 @@
 
 <body>
 <div class="container">
-    <header>
-        <h2 class="title">
-            <span class="video-title"></span>
-        </h2>
-    </header>
+<!--     <header>
 
+    </header>
+ -->
     <div id="tabs" class="clearfix">
+        <!-- < class="title"> -->
+        <!-- </h2> -->
         <div><a class="tab-item" href="#" data-mode="heatmap">Watch Video</a></div>
         <div><a class="tab-item" href="#" data-mode="summary">View Stats</a></div>
         <!-- <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div> -->
-<!--         <div class="nav">
+        <div class="brand">LectureScape</div>
+        <div class="nav">
             <div class="prev"><a href="#">&lt; Prev</a></div>
             <div class="list"><a href="video_list">Dashboard</a></div>
             <div class="next"><a href="#">Next &gt; </a></div>
-        </div>   -->
+        </div>
         <span class="search-button"></span>
         <span class="search-cancel hide"></span>
         <input type="text" class="search-bar" size="100" placeholder="search for keywords inside the video">
@@ -78,6 +79,7 @@
 
     <section id="play-vis">
         <div id="leftpane">
+            <div class="video-title"></div>
             <!-- <h3>Video</h3> -->
             <!-- <h3 id="subgoal">&nbsp;</h3> -->
                  <!-- <video id="vid3" src="" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
@@ -116,9 +118,13 @@
                     <a href="videos/mikethefrog.mp4">Download</a> the video instead.
                   </p>
                 </video>
+
+                <div id="timeline"></div>
+
                 <!-- Video Controls -->
                 <div id="video-controls">
-                    <input type="range" id="seek-bar" value="0"><br/>
+                    <input type="range" id="seek-bar" value="0">
+                    <!--<br/>-->
                     <span id="play-pause" class="player-icon play pause-display"></span>
                     <span id="time-display">0:00</span> <span id="duration-display"></span>
                     <span id="mute" class="player-icon volume-high-display"></span>
@@ -130,12 +136,22 @@
                         <div class="speed-option" data-speed="4.0">4.0x</div>
                         <div class="speed-option" data-speed="8.0">8.0x</div>
                     </div>
+                    <!-- <div id="bookmark"> -->
+                        <span id="add-bookmark-button">Add Highlight</span>
+                    <!-- </div> -->
                     <span id="full-screen" class="player-icon fullscreen-display"></span>
                 </div>
             </div>
 
+<div id="bookmark-popup">
+    <div id="bookmark-thumbnail"></div>
+    <div id="bookmark-time"></div>
+    <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
+    <button id="save-bookmark-button">Save</button>
+    <button id="cancel-bookmark-button">Cancel</button>
+</div>
 
-            <div id="ytplayer"></div>
+            <!-- <div id="ytplayer"></div> -->
             <div id="vis-options" class="clearfix">
                 <div><a class="" href="#" data-mode="raw_counts">views</a></div>
                 <div><a class="" href="#" data-mode="unique_counts">unique viewers</a></div>
@@ -145,7 +161,7 @@
                 <div><a class="" href="#" data-mode="pause_counts">pause</a></div>
                 <div><a class="" href="#" data-mode="play_kde">smoothed</a></div>
             </div>
-            <div id="timeline"></div>
+
         </div>
 
         <div id="rightpane"> <!-- sidebar-2 -->
@@ -161,16 +177,6 @@
                     <!-- <input type="checkbox"/>Visual transitions<br/>
                     <input type="checkbox"/>Topic transitions<br/><br/>
                     <input type="hidden" value="40" id="slider1"/> -->
-
-            <div id="bookmark">
-                <button id="add-bookmark-button">Add Highlight</button>
-                <div id="bookmark-thumbnail"></div>
-                <div id="bookmark-time"></div>
-                <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
-                <button id="save-bookmark-button">Save</button>
-                <button id="cancel-bookmark-button">Cancel</button>
-            </div>
-
             <div class="highlight-checkboxes">
                 <input class="from-me" type="checkbox" value="from-me-val" checked/>
                 <!-- <span class="by-me"></span> -->
@@ -206,6 +212,7 @@
     <script src="{% static 'app/myplayer/Timeline.js' %}"></script>
     <script src="{% static 'app/myplayer/Highlight.js' %}"></script>
     <script src="{% static 'app/myplayer/Transcript.js' %}"></script>
+    <script src="{% static 'app/myplayer/Topicflow.js' %}"></script>
     <script src="{% static 'app/myplayer/script.js' %}"></script>
 
     <script>
@@ -213,12 +220,17 @@
     var player;
     var options = {};
     var duration = 0;
-    var visWidth = 748; //540;
+    var visWidth = 780; //540;
     var visHeight = 80; // 80
     var video_id = "{{ video_id }}";
     var videoUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
     var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.en.srt";
+    // var videoUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L21-3_100-kbrZtHI5CSo.mp4";
+    // var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L21-3_100-kbrZtHI5CSo.en.srt";
+
     var data = {{data|safe}};
+    var vtran_data = {{vtran_data|safe}};
+    var vtran_peaks = {{vtran_peaks|safe}};
     var videos = {{videos|safe}};
     var peaks = {{peaks|safe}};
 
@@ -233,8 +245,9 @@
         Timeline.init(visWidth, visHeight);
         duration = getDuration(video_id);
         $("#duration-display").text(" / " + formatSeconds(duration));
-        Peak.init(peaks, []);
+        Peak.init(peaks, vtran_peaks, []);
         Highlight.init();
+        Topicflow.init();
         // $("#timeline").css("margin-top", visHeight + "px");
         init();
         // var curMargin = parseInt($(".chart").css("margin-top"));

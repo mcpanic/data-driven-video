@@ -11,6 +11,11 @@ function getObjectSize(obj){
     return size;
 }
 
+function getTimeDiff(t1, t2) {
+    var diff = t1.getTime() - t2.getTime()
+    return Math.abs(diff / 1000);
+}
+
 
 /* Return a human-readable format for the number of seconds */
 function formatSeconds(sec){
@@ -111,5 +116,5 @@ function bindSortableTableEvents(){
             is_ascending = $option.attr("data-default") == "ascending";
             $option.html("&nbsp;");
         }
-    });    
+    });
 }

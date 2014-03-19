@@ -37,10 +37,11 @@ function bindEvents() {
         }
         // console.log(mode, processedData);
         Timeline.drawPlayVis(processedData, duration);
+        Highlight.updatePeakColor();
 
-        // processedData = processTimeData(data);
-        processedData = data["daily_view_counts"];
-        Timeline.drawTimeVis(processedData);
+        // processedData = data["daily_view_counts"];
+        // Timeline.drawTimeVis(processedData);
+
         // redrawVis(chart, processedData, duration, visWidth, visHeight);
         return false;
     });
