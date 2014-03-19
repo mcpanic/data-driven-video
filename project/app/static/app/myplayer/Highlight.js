@@ -314,8 +314,8 @@ var Highlight = function ($, window, document) {
         for (var index in Peak.interactionPeaks){
             var j;
             for (j = peaks[index]["start"]; j <= peaks[index]["end"]; j++) {
-                console.log(j, $(".databar[data-second='" + j + "']").length);
-                console.log(j, $(".databar[data-second='" + parseInt(j) + "']").length);
+                // console.log(j, $(".databar[data-second='" + j + "']").length);
+                // console.log(j, $(".databar[data-second='" + parseInt(j) + "']").length);
                 $(".databar[data-second='" + j + "']").attr("class", "databar peak-databar");
             }
         }

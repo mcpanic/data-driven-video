@@ -10,6 +10,11 @@ var Timeline = function ($, window, document) {
     var yScale;
     var isChartMouseDown = false;
 
+
+    var draggingId = 0;
+    var peakRecovery = 0;
+
+
     function init(visWidth, visHeight){
         w = visWidth;
         h = visHeight;
@@ -23,19 +28,15 @@ var Timeline = function ($, window, document) {
     /* Move the player to the selected region to sync with the vis */
     function rectMousedownHandler(d, i){
         isChartMouseDown = true;
-        console.log(isChartMouseDown);
         // dragPlayheadMove(this);
-        //
-        console.log("DRAGGING", d3.event.dx);
+        // console.log("DRAGGING", d3.event.dx);
         $(".playbar").attr("class", "playbar dragging");
-        // console.log("mouse", d3.mouse(this));
+
         // ignore micro dragging events
         // if (d3.event.dx < 10 && d3.event.dx > -10)
         //     return;
-        isDragging = true;
         var chart = d3.selectAll("svg.play-chart");
         var playhead = d3.selectAll("svg.play-chart .playhead");
-
         var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
         var newTime = parseInt(newX * duration / chart.attr("width"));
         var newY = getAltitude(newTime);
@@ -51,45 +52,28 @@ var Timeline = function ($, window, document) {
         // 3) play a "quick" preview based on the speed from 2)
         if (dx < 0)
             speed = -1 * speed;
-        // console.log("play until", newTime);
         Player.changeSpeed(speed / 2);
         Player.playUntil(newTime, speed / 2);
 
-
-        // instead of directly jumping to that section,
-        // Player.seekTo(newTime);
-        var dragTrail = chart.selectAll(".dragtrail")
-            .data(["dragtrail"])
-            .attr("x1", playhead.attr("cx"))
-            .attr("x2", newX)
-            .attr("y1", playhead.attr("cy"))
-            .attr("y2", yScale(newY))
-            .attr("stroke-width", (speed * 2) + "px");
-        // 1) display the trail
-        dragTrail.enter().append("line")
-            .attr("class", "dragtrail");
-
-        // dragTrail.transition()
-        //     .duration(3000)
-            // .delay(500)
-            // .remove();
-            // .call(postDrag);
-
-        // console.log(d3.event, playhead.attr("cx"));
-        // console.log(newX, newY, currentTime);
-        // chart.selectAll(".playhead")
-     //        .transition()
-     //        .duration(0)
-        //     .attr("cx", newX)
-        //     .attr("cy", yScale(newY));
-        isDragging = false;
+        // 4) display a drag trail
+        // var dragTrail = chart.selectAll(".dragtrail")
+        //     .data(["dragtrail"])
+        //     .attr("x1", playhead.attr("cx"))
+        //     .attr("x2", newX)
+        //     .attr("y1", playhead.attr("cy"))
+        //     .attr("y2", yScale(newY))
+        //     .attr("stroke-width", (speed * 2) + "px");
+        // dragTrail.enter().append("line")
+        //     .attr("class", "dragtrail");
     }
 
     function mouseupHandler(e) {
-        console.log(isChartMouseDown, e, e.pageX, e.pageY);
+        window.clearInterval(draggingId);
+        // console.log(isChartMouseDown, e, e.pageX, e.pageY);
         if (!isChartMouseDown)
             return;
         isChartMouseDown = false;
+        isDragging = false;
         var leftOffset = e.pageX - $("svg.chart").offset().left;
         //var second = Math.floor(d3.mouse(e)[0] * duration / visWidth);
         var second = Math.floor(leftOffset * duration / visWidth);
@@ -123,6 +107,7 @@ var Timeline = function ($, window, document) {
             .attr("x2", curPosition);
     }
 
+/*
     var dragPlayhead = d3.behavior.drag()
         .origin(Object)
         .on("drag", dragPlayheadMove)
@@ -140,11 +125,125 @@ var Timeline = function ($, window, document) {
                 .attr("opacity", 0)
                 .remove();
         });
+*/
 
-    // function mousedownPlayheadMove(d){
-    //     console.log("pause now");
-    //     Player.pause();
-    // }
+
+    // when dragging the playhead starts
+    function playheadMousedownHandler(e){
+        // console.log(e, e.pageX, e.pageY);
+        // d3.event.sourceEvent.stopPropagation(); // silence other listeners
+        d3.event.stopPropagation();
+        // d3.event.preventDefault();
+        Player.pause();
+        isChartMouseDown = true;
+        // dragPlayheadMove(this);
+        draggingId = setInterval(handleDragging, 20);
+        console.log("MOUSEDOWN", draggingId);
+        // $(".playbar").attr("class", "playbar dragging");
+        // console.log("mouse", d3.mouse(this));
+        // ignore micro dragging events
+        // if (d3.event.dx < 10 && d3.event.dx > -10)
+        //     return;
+        /*
+        isDragging = true;
+        var chart = d3.selectAll("svg.play-chart");
+        var playhead = d3.selectAll("svg.play-chart .playhead");
+
+        var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
+        var newTime = parseInt(newX * duration / chart.attr("width"));
+        var newY = getAltitude(newTime);
+        console.log("x", newX, "time", newTime);
+        Player.seekTo(newTime);
+        */
+    }
+
+    var curMousePos;
+    function handleDragging() {
+        isDragging = true;
+        if (!isChartMouseDown || !curMousePos)
+            return;
+        // $(".playbar").attr("class", "playbar dragging");
+
+        var chart = d3.selectAll("svg.play-chart");
+        var newX = curMousePos.x;
+        var newTime = parseInt(newX * duration / chart.attr("width"));
+        var curTime = Player.getCurrentTime();
+
+        // var playhead = d3.selectAll("svg.play-chart .playhead");
+        // var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
+        // var newY = getAltitude(newTime);
+
+        // console.log("curTime", curTime, "newTime", newTime, "diff", newTime - curTime);
+        if (Peak.isInteractionPeak(curTime)) {
+            // var penalty = 0.1;
+            // var adjustedTime = curTime + penalty * (newTime - curTime);
+            var unit = newTime - curTime > 0 ? Math.min(0.15, newTime - curTime) : Math.max(-0.15, newTime - curTime);
+            var adjustedTime = curTime + unit; // static slowdown
+            // console.log("adjTime", adjustedTime);
+            Player.seekTo(adjustedTime);
+            peakRecovery = 20;
+        } else {
+            if (peakRecovery > 0) {
+                peakRecovery -= 1;
+                var penalty = 0.05;
+                var adjustedTime = curTime + penalty * (newTime - curTime);
+                // console.log("adjTime", adjustedTime);
+                Player.seekTo(adjustedTime);
+            } else {
+                Player.seekTo(newTime);
+            }
+        }
+    }
+
+
+    // simply updates the mouse position because mouse position information
+    // is only available via event handlers.
+    function chartMousemoveHandler(e){
+        // console.log(isChartMouseDown, d3.mouse(this)[0]);
+        if (!isChartMouseDown)
+            return;
+        // e = e || window.event; // IE-ism
+        curMousePos = {
+            x: d3.mouse(this)[0], // e.clientX
+            y: d3.mouse(this)[1] // e.clientY
+        };
+        return;
+        /*
+
+        // $(".playbar").attr("class", "playbar dragging");
+        // ignore micro dragging events
+        // if (d3.event.dx < 10 && d3.event.dx > -10)
+        //     return;
+        isDragging = true;
+
+        var chart = d3.selectAll("svg.play-chart");
+        var playhead = d3.selectAll("svg.play-chart .playhead");
+        var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
+        var newTime = parseInt(newX * duration / chart.attr("width"));
+        var newY = getAltitude(newTime);
+        var curTime = Player.getCurrentTime();
+        // console.log("curTime", curTime, "newTime", newTime, "diff", newTime - curTime);
+        if (Peak.isInteractionPeak(curTime)) {
+            // var penalty = 0.1;
+            // var adjustedTime = curTime + penalty * (newTime - curTime);
+            var unit = newTime - curTime > 0 ? Math.min(0.2, newTime - curTime) : Math.max(-0.2, newTime - curTime);
+            var adjustedTime = curTime + unit; // static slowdown
+            console.log("adjTime", adjustedTime);
+            Player.seekTo(adjustedTime);
+            peakRecovery = 10;
+        } else {
+            if (peakRecovery > 0) {
+                peakRecovery -= 1;
+                var penalty = 0.1;
+                var adjustedTime = curTime + penalty * (newTime - curTime);
+                Player.seekTo(adjustedTime);
+            } else {
+                Player.seekTo(newTime);
+            }
+        }
+        */
+    }
+
 
     // function postDrag(){
     //     Player.play();
@@ -269,7 +368,7 @@ var Timeline = function ($, window, document) {
             //     return tooltip.style("visibility", "hidden");
             // });
         chart.on("mousedown", rectMousedownHandler);
-
+        chart.on("mousemove", chartMousemoveHandler);
 
         // // Add histogram
         chart.selectAll("rect")
@@ -299,16 +398,18 @@ var Timeline = function ($, window, document) {
             .attr("x2", 0)
             .attr("y1", 0)
             .attr("y2", h)
-            .call(dragPlayhead);
+            .on("mousedown", playheadMousedownHandler);
+            // .call(dragPlayhead);
 
         chart.append("circle")
             .attr("class", "playhead")
             .attr("cx", 0)
             .attr("cy", yScale(dataset[0]))
             .attr("r", 8)
-            // .on("click", mousedownPlayheadMove)
-            // .on("mousedown", mousedownPlayheadMove)
-            .call(dragPlayhead);
+            .on("mousedown", playheadMousedownHandler);
+            // .on("mousemove", playheadMousemoveHandler);
+            // .call(dragPlayhead);
+
         // chart.selectAll("text")
         //     .data(dataset)
         // .enter().append("text")

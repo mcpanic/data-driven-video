@@ -116,6 +116,8 @@ var Player = function ($, window, document) {
     }
 
     function pause() {
+        if (video.paused)
+            return;
         video.pause();
         $(playButton).removeClass("pause-display").addClass("play-display");
         traces.push({
