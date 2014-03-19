@@ -2,7 +2,7 @@
 
 // Topicflow at the top of the video player
 var Topicflow = function ($, window, document) {
-
+/*
     var topics = [
         {"start": 0, "end": 30, "keywords":[
             {"label": "function", "importance": "high"},
@@ -29,11 +29,13 @@ var Topicflow = function ($, window, document) {
             ]
         }
     ];
-
+*/
+    var topics = [];
     var currentTopic;
-
+    var currentIndex = -1;
 
     function init() {
+        loadTopics();
         bindEvents();
     }
 
@@ -46,7 +48,106 @@ var Topicflow = function ($, window, document) {
         $("input.search-bar").val(clickedTopic).trigger("keyup");
     }
 
-    function displayTopics(currentTime){
+    function loadTopics() {
+        $.post("/app/keywords/",
+          {
+            videoid: video_id, //"--7OF8BOElA",
+            courseid: "6.00x-Fall-2012",
+            segtype: "fixDoc20",
+            maxwords: 4,
+          }, function(data) {
+            // console.log(data);
+            topics = $.parseJSON(data);
+            // for (var i=0; i<topics.length; i++)
+            //     console.log(topics[i]);
+          }
+        );
+    }
+    // var topics;
+
+    var weights = {
+        0: 2,
+        1: 1,
+        2: 0.8,
+        3: 0.5,
+        4: 0.2
+    };
+
+    function update(prev, curr, next) {
+        console.log("UPDATE");
+        // if (prev.length > 0)
+            visualize("#prev-topic", prev,  200, 0.5, 0.6);
+        // if (curr.length > 0)
+            visualize("#current-topic", curr,  300, 1, 1);
+        // if (next.length > 0)
+            visualize("#next-topic", next,  200, 0.5, 0.6);
+    }
+
+    function visualize(div, wordweights, wid, opacity, sizefactor){
+        var bod = d3.select(div);
+        var fill = d3.scale.category20();
+
+        d3.layout.cloud().size([200,80])
+          .words(wordweights.map(function(kw, i) {
+            return {text: kw["label"], size: kw["importance"] * 20 * sizefactor };
+          }))
+          .padding(5)
+          .rotate(function() { return  0; })
+          // .font("Impact")
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+
+        function draw(words) {
+            bod.select("svg").remove();
+
+            var width = wid;
+            var height = 80;
+            var xtranslate = width/2.0;
+            var ytranslate = height/2.0;
+
+            bod.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+              .append("g")
+                .attr("transform", "translate(" + xtranslate + "," + ytranslate+")")
+                .style("fill-opacity", opacity)
+              .selectAll("text")
+                .data(words)
+              .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", function(d, i) { return fill(i); })
+                .attr("text-anchor", "middle")
+                .attr("class", "topic")
+                .attr("transform", function(d) {
+                  return "translate(" + [d.x , d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+        }
+    }
+
+
+    function displayTopics(currentTime) {
+        var i;
+        var currentTimeMS = currentTime * 1000;
+        for (i = 0; i < topics.length; i++) {
+            // console.log(i, topics.length, currentTimeMS, topics[i], topics[i]["keywords"]);
+            if (currentTimeMS >= topics[i]["start"] && currentTimeMS <= topics[i]["end"]) {
+                Topicflow.currentTopic = topics[i];
+                // console.log(i, i+1, i==0, topics[i+1]);
+                if (i == 0)
+                    update([], topics[i]["keywords"], topics[i+1]["keywords"]);
+                else if (i == topics.length - 1)
+                    update(topics[i-1]["keywords"], topics[i]["keywords"], []);
+                else
+                    update(topics[i-1]["keywords"], topics[i]["keywords"], topics[i+1]["keywords"]);
+            }
+        }
+
+    }
+
+    function displayTopicsOld(currentTime){
         var i, j;
         var $topic;
         $("#current-topic").empty();

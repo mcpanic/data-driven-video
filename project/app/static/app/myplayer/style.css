@@ -20,6 +20,12 @@ body {
     /*height: 330px;*/
     position: relative;
     /*padding: 0 1em 18px 1em;*/
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .brand {
@@ -80,7 +86,7 @@ body {
     /*margin-top: 0.8em;    */
     border: 1px solid #888;
     border-bottom: 0;
-    height: 32px;
+    height: 80px; /*32px;*/
     box-sizing: border-box;
 }
 
@@ -214,13 +220,6 @@ body {
     background-color: #ddd;
     border: 1px solid #888;
     box-sizing: border-box;
-
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 
 	/*background-image: linear-gradient(bottom, rgb(0,0,0) 13%, rgb(0,0,0) 100%);
 	background-image: -o-linear-gradient(bottom, rgb(0,0,0) 13%, rgb(0,0,0) 100%);
@@ -472,8 +471,8 @@ button:hover {
 
 #timeline{
     position: relative;
-    margin-top: -10px;
-    height: 88px;
+    margin-top: -5px;
+    height: 96px;
     /*width: 100%;*/ /*540px;*/
     /*margin: 0 1em;*/
     background-color: #222;
@@ -481,14 +480,14 @@ button:hover {
 /*    margin-top: 80px;
     margin-left: 3em;
     margin-right: 3em;*/
-    border-bottom: 8px solid rgba(34,34,34,0.5);
+    /*border-bottom: 8px solid rgba(34,34,34,0.5);*/
 }
 
 .timeline-peak{
     position: absolute;
     /*margin-top: -45px;*/
-    /*bottom: -12px;*/
-    bottom: -8px;
+    bottom: 0;
+    /*bottom: -8px;*/
     /*border: 1px solid #bbb;*/
     cursor: pointer;
     box-sizing: border-box; width="540" height="330"
@@ -551,6 +550,9 @@ button:hover {
     background-color: #bbd;
     margin-top: 80px;
     cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #222;
 }
 
 .chart rect.peak-databar {

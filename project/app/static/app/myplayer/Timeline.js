@@ -2,18 +2,18 @@
 
 // all timeline operations
 var Timeline = function ($, window, document) {
-
-    var isDragging = false;
+    // visualization parameters
     var w;
     var h;
     var xScale;
     var yScale;
+
+    // status variables
+    var isDragging = false;
     var isChartMouseDown = false;
-
-
     var draggingId = 0;
     var peakRecovery = 0;
-
+    var curMousePos;
 
     function init(visWidth, visHeight){
         w = visWidth;
@@ -157,7 +157,6 @@ var Timeline = function ($, window, document) {
         */
     }
 
-    var curMousePos;
     function handleDragging() {
         isDragging = true;
         if (!isChartMouseDown || !curMousePos)
@@ -255,7 +254,7 @@ var Timeline = function ($, window, document) {
         return dataset[parseInt(time)];
     }
 
-
+/*
     function dragPlayheadMove(d){
         console.log("DRAGGING", d3.event.dx);
         $(".playbar").attr("class", "playbar dragging");
@@ -317,7 +316,7 @@ var Timeline = function ($, window, document) {
         //     .attr("cy", yScale(newY));
         isDragging = false;
     }
-
+*/
 
     /* Render the heatmap visualization */
     function drawPlayVis(dataset, duration){

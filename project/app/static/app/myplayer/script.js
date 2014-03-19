@@ -2,23 +2,32 @@
 
 /* Add event handlers for tab menu and visualization options */
 function bindEvents() {
-    $("#tabs .tab-item").click(function () {
-        if ($(this).hasClass("active")) {
-            return;
-        }
-        $(".tab-item").removeClass("active");
-        $(this).addClass("active");
-        $("section").hide();
-        if ($(this).attr("data-mode") === "summary"){
-            $("#stats").show();
-            $("#speed").show();
-        } else if ($(this).attr("data-mode") === "heatmap"){
-            $("#play-vis").show();
-        } else if ($(this).attr("data-mode") === "views"){
-            $("#time-vis").show();
-        }
-        return false;
+
+    $(document).on("click", ".nav .list", function(){
+        console.log("MULTI-VIDEO MODE");
+        Player.pause();
+        $(".nav .prev").hide();
+        $(".nav .next").hide();
+        $("#timeline").css("width", "100px");
     });
+
+    // $("#tabs .tab-item").click(function () {
+    //     if ($(this).hasClass("active")) {
+    //         return;
+    //     }
+    //     $(".tab-item").removeClass("active");
+    //     $(this).addClass("active");
+    //     $("section").hide();
+    //     if ($(this).attr("data-mode") === "summary"){
+    //         $("#stats").show();
+    //         $("#speed").show();
+    //     } else if ($(this).attr("data-mode") === "heatmap"){
+    //         $("#play-vis").show();
+    //     } else if ($(this).attr("data-mode") === "views"){
+    //         $("#time-vis").show();
+    //     }
+    //     return false;
+    // });
 
     $("#vis-options a").click(function () {
         // console.log($(this).text(), "clicked");
@@ -140,11 +149,17 @@ function init(){
     displayNav(video_id);
     displayStats();
     displayPlayRates();
+
     // by default, click the first item
-    $("#tabs a").first().trigger("click");
+    // $("#tabs a").first().trigger("click");
+    // tab click is replaced
+    $("#play-vis").show();
+
     // $("#vis-options a").first().trigger("click");
     $("#vis-options a").eq(6).trigger("click");
     $("#vis-options").hide();
+
+
     $("#speed-table th").first().trigger("click");
     //displayPeaks(peaks);
 }

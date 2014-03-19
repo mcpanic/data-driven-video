@@ -248,7 +248,7 @@ var Player = function ($, window, document) {
                 console.log("first time");
                 Topicflow.displayTopics(intCurrentTime);
             } else {
-                if (intCurrentTime <= Topicflow.currentTopic["start"] || intCurrentTime >= Topicflow.currentTopic["end"]){
+                if (intCurrentTime * 1000 <= Topicflow.currentTopic["start"] || intCurrentTime  * 1000 >= Topicflow.currentTopic["end"]){
                     console.log("topic changed");
                     Topicflow.displayTopics(intCurrentTime);
                 }
