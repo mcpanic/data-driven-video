@@ -320,7 +320,7 @@ var Transcript = function ($, window, document) {
         // since UID might get messed up. We're batch-assigning IDs.
         Peak.searchPeaks.sort(Peak.sortPeaksByTime);
         Peak.assignSearchUID();
-        console.log(searchData);
+        // console.log(searchData);
         return searchData;
     }
 

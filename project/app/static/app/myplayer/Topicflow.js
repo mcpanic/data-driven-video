@@ -74,13 +74,10 @@ var Topicflow = function ($, window, document) {
     };
 
     function update(prev, curr, next) {
-        console.log("UPDATE");
-        // if (prev.length > 0)
-            visualize("#prev-topic", prev,  200, 0.5, 0.6);
-        // if (curr.length > 0)
-            visualize("#current-topic", curr,  300, 1, 1);
-        // if (next.length > 0)
-            visualize("#next-topic", next,  200, 0.5, 0.6);
+        // console.log("UPDATE");
+        visualize("#prev-topic", prev,  200, 0.5, 0.6);
+        visualize("#current-topic", curr,  300, 1, 1);
+        visualize("#next-topic", next,  200, 0.5, 0.6);
     }
 
     function visualize(div, wordweights, wid, opacity, sizefactor){

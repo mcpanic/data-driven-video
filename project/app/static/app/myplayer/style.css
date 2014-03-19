@@ -410,7 +410,7 @@ button:hover {
     z-index: 2000;
     position: absolute;
     left: 340px;
-    margin-top: -25px;
+    margin-top: -8px;
     padding: 0.5em;
     width: 400px;
     /*margin-top: -155px;*/
@@ -497,7 +497,7 @@ button:hover {
     position: absolute;
     /*margin-top: -45px;*/
     /*bottom: -12px;*/
-    bottom: -8px;
+    bottom: 0;
     /*border: 1px solid #bbb;*/
     cursor: pointer;
     box-sizing: border-box;
