@@ -19,7 +19,7 @@ function getTimeDiff(t1, t2) {
 
 /* Return a human-readable format for the number of seconds */
 function formatSeconds(sec){
-    var s = Math.round(sec%60);
+    var s = Math.floor(sec%60);
     return "" + Math.floor(sec/60) + ":" + (s<=9 ? '0' + s : s);
 }
 

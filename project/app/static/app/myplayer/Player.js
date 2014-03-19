@@ -115,8 +115,8 @@ var Player = function ($, window, document) {
             video.currentTime += adjustedSpeed;
     }
 
-    function pause() {
-        if (video.paused)
+    function pause(forceRecord) {
+        if (video.paused && typeof forceRecord === "undefined")
             return;
         video.pause();
         $(playButton).removeClass("pause-display").addClass("play-display");
@@ -145,6 +145,7 @@ var Player = function ($, window, document) {
         seekBar.addEventListener("change", seekBarChangeHandler);
         video.addEventListener("click", videoClickHandler);
         video.addEventListener("timeupdate", videoTimeUpdateHandler);
+        video.addEventListener("ended", videoEndedHandler);
         volumeBar.addEventListener("change", volumeBarChandeHandler);
         speedButton.addEventListener("click", speedButtonClickHandler);
         $(".speed-option").on("click", speedOptionClickHandler);
@@ -326,6 +327,13 @@ var Player = function ($, window, document) {
         seekBar.value = value;
         Timeline.movePlayhead(video.currentTime);
     }
+
+    // Event listener for the video playback end
+    function videoEndedHandler() {
+        pause(true);
+        console.log("video ended");
+    }
+
 
     // Event listener for the volume bar
     function volumeBarChandeHandler(){
