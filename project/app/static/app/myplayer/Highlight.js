@@ -42,6 +42,7 @@ var Highlight = function ($, window, document) {
         $(document).on("click", "#add-bookmark-button", addBookmarkButtonClickHandler);
         $(document).on("click", "#save-bookmark-button", saveBookmarkButtonClickHandler);
         $(document).on("click", "#cancel-bookmark-button", cancelBookmarkButtonClickHandler);
+        $(document).on("keyup", "#bookmark-description", bookmarkDescriptionKeyupHandler);
         $(document).on("click", ".highlight-checkboxes label", checkboxClickHandler);
         // $(document).on("mouseenter", "#bookmark-popup", function(e){ e.preventDefault(); $(this).css("z-index", 3000); console.log("prevent"); return false;});
     }
@@ -50,6 +51,11 @@ var Highlight = function ($, window, document) {
         Player.seekTo($(this).data("start"));
     }
 
+    function bookmarkDescriptionKeyupHandler(e) {
+        if (e.keyCode === 13) {
+            $("#save-bookmark-button").click();
+        }
+    }
 
     function isInteractionShown() {
         return $("input.from-others").is(":checked");
@@ -202,6 +208,7 @@ var Highlight = function ($, window, document) {
             $("#bookmark-popup").show();
             $("#bookmark-thumbnail").show();
             $("#bookmark-description").show();
+            $("#bookmark-description").focus()
             $("#save-bookmark-button").show();
             $("#cancel-bookmark-button").show();
             $("#bookmark-time").text(formatSeconds(curTime)).show();
