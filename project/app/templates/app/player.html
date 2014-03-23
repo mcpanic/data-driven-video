@@ -225,11 +225,10 @@
     var video_id = "{{ video_id }}";
     var course = "{{ course }}";
     // var urlPrefix = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/";
-    var urlPrefix = "http://juhokim.com/edxanalytics/";
-    var course = "6.00x";
+    var mediaUrlPrefix = "http://juhokim.com/edxanalytics/";
 
-    var videoUrl = urlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
-    var transcriptUrl = urlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";
+    var videoUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
+    var transcriptUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";
     //"M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
 
     // var videoUrl = "https://s3.amazonaws.com/edx-course-videos/mit-3091x/M-3091X-FA12-L22-2_100.mp4";
@@ -245,7 +244,7 @@
     var peaks = {{peaks|safe}};
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
-            "http://localhost:5555/app/player/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
+            "http://juhokim.com:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
     }
 
     // var getParameterByName();
