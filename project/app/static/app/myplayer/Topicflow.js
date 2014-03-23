@@ -49,12 +49,16 @@ var Topicflow = function ($, window, document) {
     }
 
     function loadTopics() {
+        var course_name = course + "-Fall-2012";
+        var segtype = gup("segtype") || "fixDoc20";
+        var maxwords = parseInt(gup("maxwords")) || 4;
+        console.log(course_name, segtype, maxwords);
         $.post("/app/keywords/",
           {
             videoid: video_id, //"--7OF8BOElA",
-            courseid: "6.00x-Fall-2012",
-            segtype: "fixDoc20",
-            maxwords: 4,
+            courseid: course_name,
+            segtype: segtype,
+            maxwords: maxwords,
           }, function(data) {
             // console.log(data);
             topics = $.parseJSON(data);

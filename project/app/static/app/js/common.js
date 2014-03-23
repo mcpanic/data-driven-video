@@ -1,5 +1,11 @@
 /* Helper Functions */
 
+/* Query string parser */
+function gup(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
 /* Return the size of an object, because .length doesn't work for objects */
 function getObjectSize(obj){
     var size = 0;

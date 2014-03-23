@@ -65,16 +65,17 @@ def get_db():
 
 
 # @view(name="player")
-def player(request, vid):
+def player(request, course, vid):
     """
     Example: http://localhost:9999/view/player?vid=2deIoNhqDsg
     """
+    # print course, vid
     mongodb = get_db()
     [data, peaks, vtran_data, vtran_peaks] = video_single_query(vid)
-    videos = video_info_query()
+    videos = video_info_query(course)
     # from edinsights.core.render import render
     return render(request, "app/player.html", {
-        'video_id': vid, 'data': data, 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks, 'videos': videos, 'peaks': peaks
+        'course': course , 'video_id': vid, 'data': data, 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks, 'videos': videos, 'peaks': peaks
     })
 
 
@@ -216,7 +217,7 @@ def video_list_query():
 
 
 # @query(name="video_info")
-def video_info_query():
+def video_info_query(course=""):
     """
     Get a list of all videos in the database
     """
@@ -226,7 +227,13 @@ def video_info_query():
     collection = mongodb[VIDEOS_COL]
 
     #UIST 2014
-    entries = list(collection.find({"course_name":"6.00x-Fall-2012"})
+    if course == "6.00x":
+        course_name = "6.00x-Fall-2012"
+    elif course == "3.091x":
+        course_name = "3.091x-Fall-2012"
+    else:
+        course_name = "6.00x-Fall-2012"
+    entries = list(collection.find({"course_name":course_name})
         .sort([("week_number", ASCENDING), ("sequence_number", ASCENDING), ("module_index", ASCENDING)]))
 
     # entries = list(collection.find().sort("video_name"))

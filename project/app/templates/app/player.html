@@ -223,7 +223,7 @@
     var visWidth = 780; //540;
     var visHeight = 80; // 80
     var video_id = "{{ video_id }}";
-
+    var course = "{{ course }}";
     // var urlPrefix = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/";
     var urlPrefix = "http://juhokim.com/edxanalytics/";
     var course = "6.00x";
@@ -243,18 +243,19 @@
     var vtran_peaks = {{vtran_peaks|safe}};
     var videos = {{videos|safe}};
     var peaks = {{peaks|safe}};
-
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
             "http://localhost:5555/app/player/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
     }
 
+    // var getParameterByName();
     $(document).ready(function(){
         // Load the IFrame Player API code asynchronously.
         // var tag = document.createElement('script');
         // tag.src = "https://www.youtube.com/iframe_api";
         // var firstScriptTag = document.getElementsByTagName('script')[0];
         // firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
         Player.init(videoUrl);
         Transcript.init(transcriptUrl);
         Timeline.init(visWidth, visHeight);
