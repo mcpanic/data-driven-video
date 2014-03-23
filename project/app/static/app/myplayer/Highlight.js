@@ -262,7 +262,8 @@ var Highlight = function ($, window, document) {
         for (var index in peaks){
             // TODO: get rid of the temporary link
             // var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + peaks[index][1] + '.jpg';
-            var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + parseInt(peaks[index]["top"]) + '.jpg';
+            // var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + parseInt(peaks[index]["top"]) + '.jpg';
+            var imgPath = urlPrefix + "thumbs/" + course + "/v_" + video_id + '_' + parseInt(peaks[index]["top"]) + '.jpg';
             var displayClass = (peaks[index]["type"] == "interaction") ? "by-others" : "by-me";
 
             // Part 1. update sidebar

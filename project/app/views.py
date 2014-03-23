@@ -8,7 +8,7 @@ import json
 from bson import json_util
 from collections import defaultdict
 from itertools import chain
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING, DESCENDING
 from django.http import HttpResponse
 from django.shortcuts import render
 # from django.conf import settings
@@ -224,7 +224,12 @@ def video_info_query():
     start_time = time.time()
 
     collection = mongodb[VIDEOS_COL]
-    entries = list(collection.find().sort("video_name"))
+
+    #UIST 2014
+    entries = list(collection.find({"course_name":"6.00x-Fall-2012"})
+        .sort([("week_number", ASCENDING), ("sequence_number", ASCENDING), ("module_index", ASCENDING)]))
+
+    # entries = list(collection.find().sort("video_name"))
     # entries = list(collection.find({ "$or": [{"course_name":"PH207x-Fall-2012"},{"course_name":"CS188x-Fall-2012"},{"course_name":"3.091x-Fall-2012"},{"course_name":"6.00x-Fall-2012"}]}).sort("video_name"))
 
     # only MIT courses
