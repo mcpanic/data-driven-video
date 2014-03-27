@@ -70,16 +70,16 @@ var Player = function ($, window, document) {
                 break;
             }
         }
-        console.log("TRACE", start, end, getTimeDiff(end["time"], start["time"]));
+        // console.log("TRACE", start, end, getTimeDiff(end["time"], start["time"]));
         start["processed"] = true;
         // add the segment to the timeline
         if (end["type"] == "pause") {
-            console.log("play-pause", start["vtime"], end["vtime"]);
+            // console.log("play-pause", start["vtime"], end["vtime"]);
             segStart = start["vtime"];
             segEnd = end["vtime"];
             end["processed"] = true;
         } else if (end["type"] == "play") {
-            console.log("play-play", start["vtime"], start["vtime"] + getTimeDiff(end["time"], start["time"]));
+            // console.log("play-play", start["vtime"], start["vtime"] + getTimeDiff(end["time"], start["time"]));
             segStart = start["vtime"];
             segEnd = start["vtime"] + getTimeDiff(end["time"], start["time"]);
         }
@@ -241,23 +241,23 @@ var Player = function ($, window, document) {
         // Things that don't need updates every time.
         // Currently happnening every 2 seconds.
         // TODO: make efficient. reduce looping. group same time topics into a single object
-        if (lastTimeUpdate - intCurrentTime < -2 || lastTimeUpdate - intCurrentTime > 2){
+        if (lastTimeUpdate - intCurrentTime < -3 || lastTimeUpdate - intCurrentTime > 3){
             lastTimeUpdate = intCurrentTime;
             // console.log("checking");
 
             if (typeof Topicflow.currentTopic === "undefined") {
-                console.log("first time");
+                // console.log("first time");
                 Topicflow.displayTopics(intCurrentTime);
             } else {
                 if (intCurrentTime * 1000 <= Topicflow.currentTopic["start"] || intCurrentTime  * 1000 >= Topicflow.currentTopic["end"]){
-                    console.log("topic changed");
+                    // console.log("topic changed");
                     Topicflow.displayTopics(intCurrentTime);
                 }
             }
 
             Highlight.updateScreenshot(video.currentTime);
         }
-
+/*
         // slow down for hills
         if (isPlayUntil){
             var adjustedSpeed;
@@ -303,7 +303,7 @@ var Player = function ($, window, document) {
                 isPeak = false;
             }
         }
-
+*/
         // only when in the interaction peaks
         if (Peak.isPeak(video.currentTime)) {
             $(".playbar").attr("class", "playbar dragging peak");

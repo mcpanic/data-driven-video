@@ -137,7 +137,7 @@ var Timeline = function ($, window, document) {
         Player.pause();
         isChartMouseDown = true;
         // dragPlayheadMove(this);
-        draggingId = setInterval(handleDragging, 20);
+        draggingId = setInterval(handleDragging, 10);
         console.log("MOUSEDOWN", draggingId);
         // $(".playbar").attr("class", "playbar dragging");
         // console.log("mouse", d3.mouse(this));

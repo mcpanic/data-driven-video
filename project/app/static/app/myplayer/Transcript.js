@@ -297,7 +297,10 @@ var Transcript = function ($, window, document) {
             console.log(foundStartTime, foundEndTime, subtitles[foundStartTime]);
             for (var j = foundStartIndex; j <= foundEndIndex; j++) {
                 var time = orderedTimeIndices[j];
-                sentence += subtitles[time].t;
+                if (j !== foundStartIndex)
+                    sentence += " " + subtitles[time].t;
+                else
+                    sentence += subtitles[time].t;
             }
 
             var words = sentence.split(/\s+/),
@@ -462,7 +465,7 @@ var Transcript = function ($, window, document) {
 
             $("<span/>")
                 .addClass("tooltip")
-                .text("[" + formatSeconds(peak["top"]) + "] " + peak["label"])
+                .html("[" + formatSeconds(peak["top"]) + "] " + peak["label"])
                 .appendTo($timelinePeak);
         }
 
@@ -527,8 +530,8 @@ var Transcript = function ($, window, document) {
         }
 
         orderedTimeIndices.sort(function(a,b) { return a - b;});
-        console.log(subtitles);
-        console.log(orderedTimeIndices);
+        // console.log(subtitles);
+        // console.log(orderedTimeIndices);
         // var currentSubtitle = -1;
         // var ival = setInterval(function () {
         //   var currentTime = document.getElementById(videoId).currentTime;
