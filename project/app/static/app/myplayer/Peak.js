@@ -80,6 +80,66 @@ var Peak = function ($, window, document) {
         return false;
     }
 
+    function getInteractionPeakAt(time) {
+        var i;
+        var peak;
+        for (i in Peak.interactionPeaks) {
+            if (Peak.interactionPeaks[i]["start"] <= time && time <= Peak.interactionPeaks[i]["end"])
+                peak = Peak.interactionPeaks[i];
+        }
+        return peak;
+    }
+
+    function getSearchPeakAt(time) {
+        var i;
+        var peak;
+        for (i in Peak.searchPeaks) {
+            if (Peak.searchPeaks[i]["start"] <= time && time <= Peak.searchPeaks[i]["end"])
+                peak = Peak.searchPeaks[i];
+        }
+        return peak;
+    }
+
+    function getBookmarkPeakAt(time) {
+        var i;
+        var peak;
+        for (i in Peak.bookmarkPeaks) {
+            if (Peak.bookmarkPeaks[i]["start"] <= time && time <= Peak.bookmarkPeaks[i]["end"])
+                peak = Peak.bookmarkPeaks[i];
+        }
+        return peak;
+    }
+
+    function getInteractionPeakByUID(uid) {
+        var i;
+        var peak;
+        for (i in Peak.interactionPeaks) {
+            if (Peak.interactionPeaks[i]["uid"] == uid)
+                peak = Peak.interactionPeaks[i];
+        }
+        return peak;
+    }
+
+    function getSearchPeakByUID(uid) {
+        var i;
+        var peak;
+        for (i in Peak.searchPeaks) {
+            if (Peak.searchPeaks[i]["uid"] == uid)
+                peak = Peak.searchPeaks[i];
+        }
+        return peak;
+    }
+
+    function getBookmarkPeakByUID(uid) {
+        var i;
+        var peak;
+        for (i in Peak.bookmarkPeaks) {
+            if (Peak.bookmarkPeaks[i]["uid"] == uid)
+                peak = Peak.bookmarkPeaks[i];
+        }
+        return peak;
+    }
+
     // is now under "any" type of peaks?
     function isPeak(time) {
         return isInteractionPeak(time) || isSearchPeak(time) || isBookmarkPeak(time);
@@ -104,6 +164,12 @@ var Peak = function ($, window, document) {
         isInteractionPeak: isInteractionPeak,
         isSearchPeak: isSearchPeak,
         isBookmarkPeak: isBookmarkPeak,
+        getInteractionPeakAt: getInteractionPeakAt,
+        getSearchPeakAt: getSearchPeakAt,
+        getBookmarkPeakAt: getBookmarkPeakAt,
+        getInteractionPeakByUID: getInteractionPeakByUID,
+        getSearchPeakByUID: getSearchPeakByUID,
+        getBookmarkPeakByUID: getBookmarkPeakByUID,
         isPeak: isPeak,
         addBookmarkPeak: addBookmarkPeak,
         sortPeaksByTime: sortPeaksByTime

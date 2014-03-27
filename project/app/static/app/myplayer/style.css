@@ -529,9 +529,14 @@ button:hover {
     background-color: teal;
 }
 
-.timeline-peak.brushing{
+.timeline-peak.brushing {
     /*border: 2px solid yellow;*/
     background-color: yellow;
+}
+
+.chart rect.peak-databar.brushing {
+    fill: yellow;
+    stroke: yellow;
 }
 
 .screenshot.brushing .by-others, .screenshot.brushing .by-me {
@@ -543,8 +548,7 @@ button:hover {
     border-top: 5px solid yellow;
 }
 
-
-.timeline-peak:hover .tooltip, .timeline-result.by-search:hover .tooltip, .trace:hover .tooltip{
+.peak-databar:hover .tooltip, .timeline-peak:hover .tooltip, .timeline-result.by-search:hover .tooltip, .trace:hover .tooltip{
     display: block;
 }
 
@@ -562,7 +566,7 @@ button:hover {
     background-color: white;
     border: 1px solid #bbb;
     border-radius: 5px;
-    box-shadow: 10px 10px 10px #888888;
+    box-shadow: 5px 5px 5px #888888;
 }
 
 .trace {

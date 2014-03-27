@@ -318,6 +318,24 @@ var Timeline = function ($, window, document) {
     }
 */
 
+    function addDatabarBrushing (peak) {
+        var j;
+        for (j = peak["start"]; j <= peak["end"]; j++) {
+            var $databar = $(".databar[data-second='" + j + "']")
+                .attr("class", "databar peak-databar brushing");
+        }
+        $("#peak_" + peak["uid"]).addClass("brushing");
+    }
+
+    function removeDatabarBrushing (peak) {
+        var j;
+        for (j = peak["start"]; j <= peak["end"]; j++) {
+            var $databar = $(".databar[data-second='" + j + "']")
+                .attr("class", "databar peak-databar");
+        }
+        $("#peak_" + peak["uid"]).removeClass("brushing");
+    }
+
     /* Render the heatmap visualization */
     function drawPlayVis(dataset, duration){
         d3.selectAll("svg.play-chart").remove();
@@ -335,13 +353,13 @@ var Timeline = function ($, window, document) {
                 //     .attr("transform", "translate(0,30)");
 
         // Show tooltips on mouseover
-        var tooltip = d3.select("body")
-            .append("div")
-            .attr("class", "tooltip")
-            .style("position", "absolute")
-            .style("z-index", "10")
-            .style("visibility", "hidden")
-            .text("Tooltip");
+        // var tooltip = d3.select("body")
+        //     .append("div")
+        //     .attr("class", "tooltip")
+        //     .style("position", "absolute")
+        //     .style("z-index", "10")
+        //     .style("visibility", "hidden")
+        //     .text("Tooltip");
 
         var line = d3.svg.line()
             .x(function(d, i){ return xScale(i); })
@@ -369,6 +387,13 @@ var Timeline = function ($, window, document) {
         chart.on("mousedown", rectMousedownHandler);
         chart.on("mousemove", chartMousemoveHandler);
 
+        var tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "interaction-peak-tooltip tooltip")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .text("");
+
         // // Add histogram
         chart.selectAll("rect")
             .data(dataset)
@@ -378,17 +403,32 @@ var Timeline = function ($, window, document) {
             .attr("x", function(d, i){ return i * (w / dataset.length); })
             .attr("y", yScale)
             .attr("width", w / dataset.length - barPadding)
-            .attr("height", function(d){ return h - yScale(d); });
+            .attr("height", function(d){ return h - yScale(d); })
             // // .on("click", rectMousedownHandler)
-            // .on("mouseover", function(d, i){
-            //     return tooltip.text("at " + formatSeconds(i) + " count: " + d).style("visibility", "visible");
-            // })
+            .on("mouseover", function(d, i){
+                var curPeak = Peak.getInteractionPeakAt(i);
+                var j;
+                if (typeof curPeak !== "undefined") {
+                    addDatabarBrushing(curPeak);
+                    return tooltip
+                        .style("top", (event.pageY-10) + "px")
+                        .style("left", (event.pageX+10) + "px")
+                        .style("display", "block")
+                        .text("[" + formatSeconds(i) + "] " + curPeak["label"]);
+                }
+                return;
+            })
             // .on("mousemove", function(d){
             //     return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
             // })
-            // .on("mouseout", function(d){
-            //     return tooltip.style("visibility", "hidden");
-            // });
+            .on("mouseout", function(d, i) {
+                var curPeak = Peak.getInteractionPeakAt(i);
+                var j;
+                if (typeof curPeak !== "undefined") {
+                    removeDatabarBrushing(curPeak);
+                }
+                return tooltip.style("display", "none");
+            });
 
         // Add playbar
         chart.append("line")
@@ -572,7 +612,9 @@ var Timeline = function ($, window, document) {
         movePlayhead: movePlayhead,
         drawPlayVis: drawPlayVis,
         drawTimeVis: drawTimeVis,
-        addSegment: addSegment
+        addSegment: addSegment,
+        addDatabarBrushing: addDatabarBrushing,
+        removeDatabarBrushing: removeDatabarBrushing
     }
 
 }(jQuery, window, document);

@@ -169,6 +169,10 @@ var Highlight = function ($, window, document) {
         $(this).addClass("brushing");
         // find corresponding timeline mark
         $("#timeline-peak-" + $(this).data("uid")).addClass("brushing");
+        // brushing on the timeline itself
+        var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
+        if (typeof peak !== "undefined")
+            Timeline.addDatabarBrushing(peak);
     }
 
     function screenshotMouseleaveHandler(){
@@ -176,6 +180,10 @@ var Highlight = function ($, window, document) {
         $(this).removeClass("brushing");
         // find corresponding timeline mark
         $("#timeline-peak-" + $(this).data("uid")).removeClass("brushing");
+        // brushing on the timeline itself
+        var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
+        if (typeof peak !== "undefined")
+            Timeline.removeDatabarBrushing(peak);
     }
 
     function timelinePeakMouseenterHandler(){
@@ -326,10 +334,9 @@ var Highlight = function ($, window, document) {
             return;
         for (var index in Peak.interactionPeaks){
             var j;
-            for (j = peaks[index]["start"]; j <= peaks[index]["end"]; j++) {
-                // console.log(j, $(".databar[data-second='" + j + "']").length);
-                // console.log(j, $(".databar[data-second='" + parseInt(j) + "']").length);
-                $(".databar[data-second='" + j + "']").attr("class", "databar peak-databar");
+            for (j = Peak.interactionPeaks[index]["start"]; j <= Peak.interactionPeaks[index]["end"]; j++) {
+                var $databar = $(".databar[data-second='" + j + "']")
+                    .attr("class", "databar peak-databar");
             }
         }
     }

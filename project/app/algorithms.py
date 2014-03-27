@@ -82,7 +82,7 @@ def detect_peaks(data, tau=2, type="interaction"):
                     i = i + 1
 
             #windows.append([start, peak, end, int(rise_rate*100)])
-            windows.append({"start": start, "top": peak, "end": end, "score": int(rise_rate*100), "type": type, "label": ""})
+            windows.append({"start": start, "top": peak, "end": end, "score": int(rise_rate*100), "type": type, "label": "Other learners rewatched this part."})
             #print "window added", start, peak, end
         else:
             [mean, meandev] = detect_peaks_update(mean, meandev, bins[i])

@@ -50,7 +50,7 @@ var Topicflow = function ($, window, document) {
 
     function loadTopics() {
         var course_name = course + "-Fall-2012";
-        var segtype = gup("segtype") || "fixDoc20";
+        var segtype = gup("segtype") || "peakBoundary";
         var maxwords = parseInt(gup("maxwords")) || 4;
         console.log(course_name, segtype, maxwords);
         $.post("/app/keywords/",
