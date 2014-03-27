@@ -543,7 +543,7 @@ var Timeline = function ($, window, document) {
     function addSegment(start, end, tid) {
         var xPos = start/duration * 100;
         var width = (end - start)/duration * 100;
-        $("<div/>")
+        var $trace = $("<div/>")
             .addClass("trace")
             .attr("id", "trace-" + tid)
             .data("sid", tid)
@@ -552,6 +552,11 @@ var Timeline = function ($, window, document) {
             .css("left", xPos + "%")
             .css("width", width + "%")
             .appendTo("#timeline");
+
+        $("<span/>")
+            .addClass("tooltip")
+            .text("You watched this segment already.")
+            .appendTo($trace);
 
         // opacity change only when there are more than 3 traces
         for (var i = 3; i < tid; i++) {

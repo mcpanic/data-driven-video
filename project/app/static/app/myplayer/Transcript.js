@@ -244,9 +244,8 @@ var Transcript = function ($, window, document) {
         Peak.searchPeaks = [];
     }
 
-
+    // add Gaussian and convolution to the timeline
     function formatSearchData(timemarks, term) {
-        // add Gaussian and convolution to the timeline
         var searchData = [];
         console.log(timemarks);
         var i;
@@ -284,13 +283,46 @@ var Transcript = function ($, window, document) {
             var foundEndTimeInt = parseInt(subtitles[foundEndTime].o);
             var foundTopTimeInt = parseInt(timemarks[i]);
             // console.log(foundStartTimeInt, foundTopTimeInt, foundEndTimeInt, timemarks[i], parseFloat(timemarks[i]));
+
+            // add interaction data
+            var interactionScoreArray = [];
+            for (var j = foundStartTimeInt; j <= foundEndTimeInt; j++) {
+                interactionScoreArray.push(data.play_counts[j]);
+            }
+            var interactionScore = Math.max.apply( Math, interactionScoreArray ) * 1.5;
+            console.log(foundStartTimeInt, foundEndTimeInt, interactionScoreArray.length, interactionScore);
+
+            // construct a full sentence
+            var sentence = "";
+            console.log(foundStartTime, foundEndTime, subtitles[foundStartTime]);
+            for (var j = foundStartIndex; j <= foundEndIndex; j++) {
+                var time = orderedTimeIndices[j];
+                sentence += subtitles[time].t;
+            }
+
+            var words = sentence.split(/\s+/),
+                wordsLength = words.length,
+                word = '';
+            // console.log(j, p[j].innerText, p[j].innerText.split(/\s+/), words.length);
+            while(--wordsLength >= 0) {
+                word = words[wordsLength];
+                // if(word.toLowerCase() == s.value.toLowerCase()) {
+                // partial matching support
+                // console.log(term, word.toLowerCase(), term.indexOf(word.toLowerCase()));
+                if(word.toLowerCase().indexOf(term) !== -1) {
+                    words[wordsLength] = "<span class='search-found'>" + word + "</span>";
+                }
+            }
+            sentence = words.join(' ');
+            console.log(sentence);
+
             // uphill
             var unit = 0;
             for (var j = foundStartTimeInt; j <= foundTopTimeInt; j++) {
                 if (foundTopTimeInt === foundStartTimeInt)
-                    unit = 300;
+                    unit = interactionScore;
                 else
-                    unit = 300 / (foundTopTimeInt - foundStartTimeInt);
+                    unit = interactionScore / (foundTopTimeInt - foundStartTimeInt);
                 searchData[j] += unit * (j - foundStartTimeInt + 1);
             }
             // downhill
@@ -298,7 +330,7 @@ var Transcript = function ($, window, document) {
                 // if (foundTopTimeInt === foundEndTimeInt)
                 //     unit = 0;
                 // else
-                unit = 300 / (foundEndTimeInt - foundTopTimeInt);
+                unit = interactionScore / (foundEndTimeInt - foundTopTimeInt);
                 searchData[j] += unit * (foundEndTimeInt - j + 1);
             }
 
@@ -310,8 +342,8 @@ var Transcript = function ($, window, document) {
                 "end": subtitles[foundEndTime].o,
                 "top": timemarks[i],
                 "type": "search",
-                "label": term,
-                "score": 100
+                "label": sentence, //term,
+                "score": interactionScore
             }
             Peak.searchPeaks.push(searchPeakObj);
             // console.log(searchPeakObj);
@@ -416,7 +448,7 @@ var Transcript = function ($, window, document) {
         for (var i in Peak.searchPeaks) {
             var peak = Peak.searchPeaks[i];
             var xPos = parseInt(peak["top"]) / duration * 100 - 8 * 100 / visWidth;
-            $("<div/>")
+            var $timelinePeak = $("<div/>")
                 .addClass("timeline-result by-search")
                 .attr("id", "timeline-search-" + peak["uid"]) // id cannot have periods in the middle
                 .data("uid", peak["uid"])
@@ -427,6 +459,11 @@ var Transcript = function ($, window, document) {
                 .data("label", peak["label"])
                 .css("left", xPos + "%")
                 .appendTo("#timeline");
+
+            $("<span/>")
+                .addClass("tooltip")
+                .text("[" + formatSeconds(peak["top"]) + "] " + peak["label"])
+                .appendTo($timelinePeak);
         }
 
         $(".search-summary").text(count + " results found on ");

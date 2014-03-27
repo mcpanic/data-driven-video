@@ -543,6 +543,28 @@ button:hover {
     border-top: 5px solid yellow;
 }
 
+
+.timeline-peak:hover .tooltip, .timeline-result.by-search:hover .tooltip, .trace:hover .tooltip{
+    display: block;
+}
+
+.tooltip {
+    display: none;
+    background: #C8C8C8;
+    /*margin-left: 28px;*/
+    position: absolute;
+    z-index: 2000;
+    left: 30px;
+    margin-top: -8px;
+    padding: 0.5em;
+    width: 200px;
+    /*margin-top: -155px;*/
+    background-color: white;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    box-shadow: 10px 10px 10px #888888;
+}
+
 .trace {
     position: absolute;
     height: 16px;

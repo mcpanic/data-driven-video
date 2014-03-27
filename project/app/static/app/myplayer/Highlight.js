@@ -197,7 +197,8 @@ var Highlight = function ($, window, document) {
     function addBookmarkButtonClickHandler(){
         var curTime = parseInt(Player.getCurrentTime());
         // var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + curTime + '.jpg';
-        var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + curTime + '.jpg';// console.log(curTime, imgPath);
+        // var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + curTime + '.jpg';// console.log(curTime, imgPath);
+        var imgPath = mediaUrlPrefix + "thumbs/" + course + "/v_" + video_id + '_' + curTime + '.jpg';
         // if (!$(this).is(":disabled")){
             // $(this).attr("disabled", "disabled");
         if ($("#bookmark-popup").is(":visible")) {
@@ -297,7 +298,7 @@ var Highlight = function ($, window, document) {
             // Part 2. update timeline
             //timeline - width of the peak div
             var xPos = peaks[index]["top"]/duration * 100 - 8*100 / visWidth;
-            $("<div/>")
+            var $timelinePeak = $("<div/>")
                 .addClass("timeline-peak " + displayClass)
                 .attr("id", "timeline-peak-" + peaks[index]["uid"])
                 .data("uid", peaks[index]["uid"])
@@ -308,6 +309,10 @@ var Highlight = function ($, window, document) {
                 .data("label", peaks[index]["label"])
                 .css("left", xPos + "%")
                 .appendTo("#timeline");
+            $("<span/>")
+                .addClass("tooltip")
+                .text("[" + formatSeconds(peaks[index]["top"]) + "] " + peaks[index]["label"])
+                .appendTo($timelinePeak);
 
         }
         updatePeaks(peaks, 0);
