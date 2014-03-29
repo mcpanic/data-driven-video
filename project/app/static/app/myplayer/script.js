@@ -28,7 +28,7 @@ function bindEvents() {
     //     }
     //     return false;
     // });
-
+/*
     $("#vis-options a").click(function () {
         // console.log($(this).text(), "clicked");
         $("#vis-options a").removeClass("active");
@@ -54,6 +54,7 @@ function bindEvents() {
         // redrawVis(chart, processedData, duration, visWidth, visHeight);
         return false;
     });
+*/
     bindSortableTableEvents();
 }
 
@@ -74,7 +75,7 @@ function displayStats(){
     $(".watching-time .substat").text("video length: " + formatSeconds(duration));
 }
 
-
+/*
 function displayPlayRates(){
     var total_playrate_counts = 0;
     var sorted_playrate_counts = [];
@@ -99,6 +100,7 @@ function displayPlayRates(){
         $row.appendTo($("#speed-table"));
     });
 }
+*/
 
 /* display video title */
 function displayTitle(video_id){
@@ -147,8 +149,8 @@ function init(){
     bindEvents();
     displayTitle(video_id);
     displayNav(video_id);
-    displayStats();
-    displayPlayRates();
+    // displayStats();
+    // displayPlayRates();
 
     // by default, click the first item
     // $("#tabs a").first().trigger("click");
@@ -156,11 +158,36 @@ function init(){
     $("#play-vis").show();
 
     // $("#vis-options a").first().trigger("click");
-    $("#vis-options a").eq(6).trigger("click");
-    $("#vis-options").hide();
+    // $("#vis-options a").eq(6).trigger("click");
+    // $("#vis-options").hide();
+    // var processedData = data["play_kde"];
+    Timeline.drawPlayVis(data["play_kde"], duration);
+    Highlight.updatePeakColor();
 
-
-    $("#speed-table th").first().trigger("click");
+    // $("#speed-table th").first().trigger("click");
     //displayPeaks(peaks);
 }
 
+function multiInit(){
+    bindEvents();
+    // displayTitle(video_id);
+    // displayNav(video_id);
+    // displayStats();
+    // displayPlayRates();
+
+    // by default, click the first item
+    // $("#tabs a").first().trigger("click");
+    // tab click is replaced
+    $("#play-vis").show();
+
+    // $("#vis-options a").first().trigger("click");
+    // $("#vis-options a").eq(6).trigger("click");
+    // $("#vis-options").hide();
+    var processedData = data["play_kde"];
+    console.log(processedData.length);
+    Timeline.drawPlayVis(processedData, duration);
+    Highlight.updatePeakColor();
+
+    // $("#speed-table th").first().trigger("click");
+    //displayPeaks(peaks);
+}

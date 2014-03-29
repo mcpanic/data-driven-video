@@ -6,6 +6,28 @@ function gup(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
+/* Normalize data array to a new range [normMin, normMax] */
+function normalizeData (points) {
+    var normMax = 1000;
+    var normMin = 100;
+    var min, max, i, m, d;
+
+    min = Math.min.apply(Math, points);
+    max = Math.max.apply(Math, points);
+    if (max === min) {
+        for (i = 0; i < config.doi.length; i++) {
+            points[i] = normMax;
+        }
+    } else {
+        m = (normMax - normMin) / (max - min);
+        d = normMax - (m * max);
+        for (i = 0; i < points.length; i++) {
+            points[i] = m * points[i] + d;
+        }
+    }
+    return points;
+}
+
 /* Return the size of an object, because .length doesn't work for objects */
 function getObjectSize(obj){
     var size = 0;

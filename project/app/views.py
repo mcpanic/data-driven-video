@@ -64,10 +64,27 @@ def get_db():
     return mongodb
 
 
+# @view(name="multiplayer")
+def multiplayer(request, course):
+    """
+    Example: http://localhost:5555/app/multiplayer/6.00x/
+    """
+    # print course, vid
+    mongodb = get_db()
+    # [data, peaks, vtran_data, vtran_peaks] = video_multiple_query(vid)
+    videos = video_info_query(course)
+    [all_data, all_interaction_peaks] = video_multiple_query(course)
+    # from edinsights.core.render import render
+    # 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks,
+    return render(request, "app/multiplayer.html", {
+        'course': course , 'all_data': all_data, 'videos': videos, 'all_interaction_peaks': all_interaction_peaks
+    })
+
+
 # @view(name="player")
 def player(request, course, vid):
     """
-    Example: http://localhost:9999/view/player?vid=2deIoNhqDsg
+    http://localhost:5555/app/player/6.00x/aTuYZqhEvuk/
     """
     # print course, vid
     mongodb = get_db()
@@ -145,9 +162,10 @@ def video_single_query(vid):
     # print vtran_peaks
     vtran_peaks = json.dumps(vtran_peaks_raw, default=json_util.default)
 
-    # Quanta workshop
     collection = mongodb[HEATMAPS_COL]
-    entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
+    # entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
+    entries = list(collection.find({"video_id": vid}, {"daily_view_counts": 0, "raw_counts": 0, "playrate_counts": 0, "pause_counts": 0, "unique_counts": 0, "replay_counts": 0, "skip_counts": 0, "completion_counts": 0}))
+
     # print vid, entries
     # L@S 2014 analysis
     # collection = mongodb["video_heatmaps_mitx_fall2012"]
@@ -183,6 +201,74 @@ def video_single_query(vid):
         result = ""
     print sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
     return [result, interaction_peaks, vtran_data, vtran_peaks]
+
+
+# @query(name="video_multiple")
+def video_multiple_query(course=""):
+    """
+    Return heatmap information from the database for a single video.
+    Example: http://localhost:9999/query/video_single?vid=2deIoNhqDsg
+    """
+
+    import numpy as np
+    mongodb = get_db()
+    start_time = time.time()
+
+    all_result = []
+    all_interaction_peaks = []
+
+    collection = mongodb[VIDEOS_COL]
+
+    #UIST 2014
+    if course == "6.00x":
+        course_name = "6.00x-Fall-2012"
+    elif course == "3.091x":
+        course_name = "3.091x-Fall-2012"
+    else:
+        course_name = "6.00x-Fall-2012"
+    entries = list(collection.find({"course_name":course_name})
+        .sort([("week_number", ASCENDING), ("sequence_number", ASCENDING), ("module_index", ASCENDING)]))
+
+    for entry in entries:
+        # vtran data might not be necessary for the multiplayer view
+        # collection = mongodb['visual_transition']
+        # vtran_temp_data = list(collection.find({"vid": vid}))
+        # vtran_data = vtran_temp_data[0]["visual_diff"]
+        # vtran_peaks_raw = detect_peaks(np.array(vtran_data)[:,1], 3, "vtran")
+        # vtran_peaks = json.dumps(vtran_peaks_raw, default=json_util.default)
+
+        collection = mongodb[HEATMAPS_COL]
+        vid = entry["video_id"]
+        # entries = list(collection.find({"video_id": vid}, {"completion_counts": 0}))
+        single_entries = list(collection.find({"video_id": vid}, {"total_watching_time": 0, "daily_view_counts": 0, "raw_counts": 0, "playrate_counts": 0, "pause_counts": 0, "unique_counts": 0, "replay_counts": 0, "skip_counts": 0, "completion_counts": 0}))
+
+        if len(single_entries):
+            # First, smooth the points and run peak detection
+            play_points = single_entries[0]["play_counts"]
+            play_points[0] = 0
+            #play_points[0:int(len(play_points)*0.03)] = [0]*int(len(play_points)*0.03)
+            play_kde = get_kde(np.array(play_points), 0.02)
+            # mask nan values
+            #print "contains nan:", np.all(np.isnan(play_kde[:,1]), 0)
+            #if np.all(np.isnan(play_kde[:,1]), 0):
+            #    play_kde = [[index, point] for index, point in enumerate(play_points)]
+            for index, point in enumerate(play_kde[:,1]):
+                if np.isnan(point):
+                  play_kde[:,1][index] = play_points[index]
+            masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde))
+            #print masked_play_kde, "max", np.max(masked_play_kde[:,1])
+            play_kde = masked_play_kde
+            play_peaks_raw = detect_peaks(play_kde[:,1], 3, "interaction")
+            single_entries[0]["play_kde"] = play_kde[:,1].tolist()
+            interaction_peaks = json.dumps(play_peaks_raw, default=json_util.default)
+            result = json.dumps(single_entries[0], default=json_util.default)
+            all_result.append(result)
+            all_interaction_peaks.append(interaction_peaks)
+        else:
+            result = ""
+    print sys._getframe().f_code.co_name, "COMPLETED", (time.time() - start_time), "seconds"
+    # return [result, interaction_peaks, vtran_data, vtran_peaks]
+    return [all_result, all_interaction_peaks]
 
 
 # @query(name="video_list")

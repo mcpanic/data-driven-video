@@ -79,9 +79,9 @@ var Topicflow = function ($, window, document) {
 
     function update(prev, curr, next) {
         // console.log("UPDATE");
-        visualize("#prev-topic", prev,  200, 0.5, 0.6);
+        visualize("#prev-topic", prev,  250, 0.5, 0.6);
         visualize("#current-topic", curr,  300, 1, 1);
-        visualize("#next-topic", next,  200, 0.5, 0.6);
+        visualize("#next-topic", next,  250, 0.5, 0.6);
     }
 
     function visualize(div, wordweights, wid, opacity, sizefactor){

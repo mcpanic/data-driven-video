@@ -29,9 +29,6 @@ var Highlight = function ($, window, document) {
     }
 
     function bindEvents() {
-        // should this belong here?
-        $(document).on("click", ".trace", traceClickHandler);
-
         $(document).on("click", ".timeline-peak", timelinePeakClickHandler);
         $(document).on("mouseenter", ".timeline-peak", timelinePeakMouseenterHandler);
         $(document).on("mouseleave", ".timeline-peak", timelinePeakMouseleaveHandler);
@@ -39,16 +36,18 @@ var Highlight = function ($, window, document) {
         $(document).on("click", ".screenshot", screenshotClickHandler);
         $(document).on("mouseenter", ".screenshot", screenshotMouseenterHandler);
         $(document).on("mouseleave", ".screenshot", screenshotMouseleaveHandler);
+        $(document).on("dragend", ".screenshot", screenshotDragendHandler);
+        $(document).on("click", ".screenshot-pin", screenshotPinClickHandler);
+        $(document).on("click", ".pip-cancel", pipCancelClickHandler);
+        $(document).on("click", ".pip-smaller", pipSmallerClickHandler);
+        $(document).on("click", ".pip-bigger", pipBiggerClickHandler);
+        // $(document).on("click", ".pin-pip", pinClickHandler);
         $(document).on("click", "#add-bookmark-button", addBookmarkButtonClickHandler);
         $(document).on("click", "#save-bookmark-button", saveBookmarkButtonClickHandler);
         $(document).on("click", "#cancel-bookmark-button", cancelBookmarkButtonClickHandler);
         $(document).on("keyup", "#bookmark-description", bookmarkDescriptionKeyupHandler);
         $(document).on("click", ".highlight-checkboxes label", checkboxClickHandler);
         // $(document).on("mouseenter", "#bookmark-popup", function(e){ e.preventDefault(); $(this).css("z-index", 3000); console.log("prevent"); return false;});
-    }
-
-    function traceClickHandler() {
-        Player.seekTo($(this).data("start"));
     }
 
     function bookmarkDescriptionKeyupHandler(e) {
@@ -186,6 +185,60 @@ var Highlight = function ($, window, document) {
             Timeline.removeDatabarBrushing(peak);
     }
 
+    function displayPip(img) {
+        var isPipSmall = $("#prev-frame").hasClass("pip-small");
+        if (isPipSmall)
+            $("#video").addClass("pip-small");
+        else
+            $("#video").addClass("pip-big");
+        $("#prev-frame img").remove();
+        $("<img/>")
+            .attr("src", img.src)
+            .appendTo($("#prev-frame"));
+        $("#prev-frame").show();
+
+    }
+
+    function screenshotDragendHandler(e){
+        console.log("dragend", e.target);
+        displayPip(e.target);
+    }
+
+    function screenshotPinClickHandler(e){
+        var $screenshot = $(this).closest(".screenshot").find("img");
+        console.log($screenshot.length);
+        if ($screenshot.length === 1)
+            displayPip($screenshot[0]);
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+
+    function pipCancelClickHandler() {
+        $("#video").removeClass("pip-small pip-big");
+        $("#prev-frame img").remove();
+        $("#prev-frame").hide();
+    }
+
+    function pipSmallerClickHandler() {
+        $("#prev-frame").removeClass("pip-big").addClass("pip-small");
+        $("#video").removeClass("pip-big").addClass("pip-small");
+    }
+
+    function pipBiggerClickHandler() {
+        $("#prev-frame").removeClass("pip-small").addClass("pip-big");
+        $("#video").removeClass("pip-small").addClass("pip-big");
+    }
+
+    function pinClickHandler(e) {
+        var $screenshot = $(this).closest(".screenshot").find("img");
+        console.log($screenshot.length);
+        if ($screenshot.length === 1)
+            displayPip($screenshot[0]);
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
     function timelinePeakMouseenterHandler(){
         $(this).addClass("brushing");
         // find corresponding screenshot
@@ -202,11 +255,15 @@ var Highlight = function ($, window, document) {
         Player.seekTo($(this).data("start"));
     }
 
-    function addBookmarkButtonClickHandler(){
-        var curTime = parseInt(Player.getCurrentTime());
+    function getThumbnailUrl(curTime) {
         // var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + curTime + '.jpg';
         // var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + curTime + '.jpg';// console.log(curTime, imgPath);
-        var imgPath = mediaUrlPrefix + "thumbs/" + course + "/v_" + video_id + '_' + curTime + '.jpg';
+        return mediaUrlPrefix + "thumbs/" + course + "/v_" + video_id + '_' + curTime + '.jpg';
+    }
+
+    function addBookmarkButtonClickHandler(){
+        var curTime = parseInt(Player.getCurrentTime());
+        var imgPath = getThumbnailUrl(curTime);
         // if (!$(this).is(":disabled")){
             // $(this).attr("disabled", "disabled");
         if ($("#bookmark-popup").is(":visible")) {
@@ -269,10 +326,7 @@ var Highlight = function ($, window, document) {
         $("#timeline .timeline-peak").remove();
         peaks.sort(Peak.sortPeaksByTime);
         for (var index in peaks){
-            // TODO: get rid of the temporary link
-            // var imgPath = '/static/djmodules/video_analytics/img/v_' +  video_id + '_' + peaks[index][1] + '.jpg';
-            // var imgPath = 'http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/img/v_' +  video_id + '_' + parseInt(peaks[index]["top"]) + '.jpg';
-            var imgPath = mediaUrlPrefix + "thumbs/" + course + "/v_" + video_id + '_' + parseInt(peaks[index]["top"]) + '.jpg';
+            var imgPath = getThumbnailUrl(peaks[index]["top"]);
             var displayClass = (peaks[index]["type"] == "interaction") ? "by-others" : "by-me";
 
             // Part 1. update sidebar
@@ -284,6 +338,7 @@ var Highlight = function ($, window, document) {
             }
             var $highlight = $("<div/>")
                 .attr("id", "peak_" + peaks[index]["uid"])
+                .attr("draggable", "true")
                 .data("uid", peaks[index]["uid"])
                 .data("second", peaks[index]["top"])
                 .data("start", peaks[index]["start"])
@@ -292,11 +347,12 @@ var Highlight = function ($, window, document) {
                 .data("label", peaks[index]["label"])
                 // .addClass("screenshot").html("<span class='tooltip'>" + peaks[index][4] + "</span><span>" + formatSeconds(peaks[index][1]) + " </span> <span class='summary'>" + peaks[index][5] + "</span><br/>" + "<img src='" + imgPath + "'>")
                 .addClass("screenshot " + displayClass)
-                .html("<span class='screenshot-time'>"
-                    + formatSeconds(peaks[index]["top"])
-                    + "</span> "
+                .html("<span class='screenshot-pin'></span>"
                     + labelHTML
                     + "<img src='" + imgPath + "'>");
+            // "<span class='screenshot-time'>"
+                    // + formatSeconds(peaks[index]["top"])
+                    // + "</span> "
             if (typeof Highlight.api !== "undefined") {
                 Highlight.api.getContentPane().append($highlight);
             } else {
@@ -347,6 +403,7 @@ var Highlight = function ($, window, document) {
         displayPeaks: displayPeaks,
         updateScreenshot: updateScreenshot,
         updatePeakColor: updatePeakColor,
+        getThumbnailUrl: getThumbnailUrl,
         api: api
     }
 }(jQuery, window, document);

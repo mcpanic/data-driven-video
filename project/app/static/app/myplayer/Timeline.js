@@ -408,13 +408,17 @@ var Timeline = function ($, window, document) {
             .on("mouseover", function(d, i){
                 var curPeak = Peak.getInteractionPeakAt(i);
                 var j;
+                if (isDragging)
+                    return;
+                tooltip.style("top", (event.pageY-150) + "px")
+                    .style("left", (event.pageX-100) + "px")
+                    .style("display", "block")
+                    .html("<img src='" + Highlight.getThumbnailUrl(i) + "' class='tooltip-thumbnail'><br/>")
                 if (typeof curPeak !== "undefined") {
                     addDatabarBrushing(curPeak);
-                    return tooltip
-                        .style("top", (event.pageY-10) + "px")
-                        .style("left", (event.pageX+10) + "px")
-                        .style("display", "block")
-                        .text("[" + formatSeconds(i) + "] " + curPeak["label"]);
+                    tooltip.html(tooltip.html() + "[" + formatSeconds(i) + "] " + curPeak["label"]);
+                } else {
+                    tooltip.html(tooltip.html() + "[" + formatSeconds(i) + "] ");
                 }
                 return;
             })
@@ -580,39 +584,12 @@ var Timeline = function ($, window, document) {
         return chart;
     }
 
-    function addSegment(start, end, tid) {
-        var xPos = start/duration * 100;
-        var width = (end - start)/duration * 100;
-        var $trace = $("<div/>")
-            .addClass("trace")
-            .attr("id", "trace-" + tid)
-            .data("sid", tid)
-            .data("start", start)
-            .data("end", end)
-            .css("left", xPos + "%")
-            .css("width", width + "%")
-            .appendTo("#timeline");
-
-        $("<span/>")
-            .addClass("tooltip")
-            .text("You watched this segment already.")
-            .appendTo($trace);
-
-        // opacity change only when there are more than 3 traces
-        for (var i = 3; i < tid; i++) {
-            var curOpacity = $("#trace-" + (i - 2)).css("opacity");
-            var newOpacity = curOpacity > 0.2 ? curOpacity - 0.2 : 0.2;
-            $("#trace-" + (i - 2)).css("opacity", newOpacity);
-        }
-    }
-
     return {
         init: init,
         getAltitude: getAltitude,
         movePlayhead: movePlayhead,
         drawPlayVis: drawPlayVis,
         drawTimeVis: drawTimeVis,
-        addSegment: addSegment,
         addDatabarBrushing: addDatabarBrushing,
         removeDatabarBrushing: removeDatabarBrushing
     }

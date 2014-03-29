@@ -108,12 +108,7 @@
                 </div>
                 <div id="video-overlay">overlay text</div>
                 <!-- Video -->
-                <div id="prev-frame" class="pip-small">
-                    <span class="pip-cancel"></span>
-                    <span class="pip-bigger"></span>
-                    <span class="pip-smaller"></span>
-                </div>
-                <video id="video" class="clearfix" width="540" height="330">
+                <video id="video" width="540" height="330">
         <!--          <source src="videos/mikethefrog.webm" type="video/webm">
                   <source src="videos/mikethefrog.ogv" type="video/ogv"> -->
  <!--                  <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4" type="video/mp4"> -->
@@ -123,7 +118,8 @@
                     <a href="videos/mikethefrog.mp4">Download</a> the video instead.
                   </p>
                 </video>
-<!--                 <div id="next-frame"></div> -->
+                <div id="prev-frame"></div>
+                <div id="next-frame"></div>
                 <div id="timeline"></div>
 
                 <!-- Video Controls -->
@@ -226,62 +222,57 @@
     var player;
     var options = {};
     var duration = 0;
-    var visWidth = 860; //540;
-    var visHeight = 70; // 80
-    var video_id = "{{ video_id }}";
+    var visWidth = 780; //540;
+    var visHeight = 80; // 80
+    // var video_id = "{{ video_id }}";
     var course = "{{ course }}";
     // var urlPrefix = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/";
     var mediaUrlPrefix = "http://juhokim.com/edxanalytics/";
 
-    var videoUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
-    var transcriptUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";
-    //"M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
+    // var videoUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
+    // var transcriptUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";
 
-    // var videoUrl = "https://s3.amazonaws.com/edx-course-videos/mit-3091x/M-3091X-FA12-L22-2_100.mp4";
-    // var videoUrl = "https://s3.amazonaws.com/edx-course-videos/mit-600x/M-600X-FA12-L5-1_100.mp4"
-    // var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.en.srt";
-    // var videoUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L21-3_100-kbrZtHI5CSo.mp4";
-    // var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L21-3_100-kbrZtHI5CSo.en.srt";
-
-    var data = {{data|safe}};
-    var vtran_data = {{vtran_data|safe}};
-    var vtran_peaks = {{vtran_peaks|safe}};
+    var allData = {{all_data|safe}};
+    // var vtran_data = {{vtran_data|safe}};
+    // var vtran_peaks = {{vtran_peaks|safe}};
     var videos = {{videos|safe}};
-    var peaks = {{peaks|safe}};
-    var i;
+    var allPeaks = {{all_interaction_peaks|safe}};
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
             "http://juhokim.com:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
     }
 
-    // remove first 3% of data to prevent from overwhelming the graph
-    var anchorVal = parseInt(data["duration"] * 0.03);
-    for (i = 0; i < data["duration"] * 0.03; i++) {
-        data["play_kde"][i] = data["play_kde"][anchorVal];
+    var data = {"play_kde": []};
+    var i, j, anchorVal, obj;
+    // var allDuration = 0;
+    for (i=0; i<allData.length; i++) {
+        obj = $.parseJSON(allData[i]);
+        if (typeof obj["play_kde"] === "undefined") {
+            console.log(obj["video_id"], "failed");
+            continue;
+        }
+        anchorVal = parseInt(obj["duration"] * 0.03);
+        // remove first 3% of data to prevent from overwhelming the graph
+        for (j = 0; j < obj["duration"] * 0.03; j++) {
+            obj["play_kde"][j] = anchorVal;
+        }
+        obj["play_kde"] = normalizeData(obj["play_kde"]);
+        data["play_kde"] = data["play_kde"].concat(obj["play_kde"]);
+        duration += obj["duration"]/10;
     }
-    data["play_kde"] = normalizeData(data["play_kde"]);
-    // var getParameterByName();
+    console.log(duration);
+    visWidth = duration;
     $(document).ready(function(){
-        // Load the IFrame Player API code asynchronously.
-        // var tag = document.createElement('script');
-        // tag.src = "https://www.youtube.com/iframe_api";
-        // var firstScriptTag = document.getElementsByTagName('script')[0];
-        // firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        Player.init(videoUrl);
-        Transcript.init(transcriptUrl);
+        // Player.init(videoUrl);
+        // Transcript.init(transcriptUrl);
         Timeline.init(visWidth, visHeight);
-        duration = getDuration(video_id);
-        $("#duration-display").text(" / " + formatSeconds(duration));
-        Peak.init(peaks, vtran_peaks, []);
-        Highlight.init();
-        PersonalTrace.init();
-        Topicflow.init();
-        // $("#timeline").css("margin-top", visHeight + "px");
-        init();
-        // var curMargin = parseInt($(".chart").css("margin-top"));
-        // $(".play-chart").css("margin-top", (curMargin - (visHeight-135)) + "px"); // 80
-        // $("#slider1").PPSlider({width: 220});
+        // duration = getDuration(video_id);
+        // $("#duration-display").text(" / " + formatSeconds(duration));
+        // Peak.init(peaks, vtran_peaks, []);
+        // Highlight.init();
+        // PersonalTrace.init();
+        // Topicflow.init();
+        multiInit();
     });
     </script>
 

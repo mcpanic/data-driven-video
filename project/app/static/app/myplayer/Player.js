@@ -22,10 +22,6 @@ var Player = function ($, window, document) {
     var lastTimeUpdate = -1000; // force trigger the first time
     var isPeak = false;
 
-    var traces = []; // personal interaction traces
-    // var isSegmentOn = false; // flag for keeping track of watching segments
-    var tid = 1;    // trace count used as ID
-
     function init(videoUrl) {
         bindEvents();
         load(videoUrl);
@@ -40,7 +36,7 @@ var Player = function ($, window, document) {
 
     function seekTo(time) {
         video.currentTime = time;
-        // traces.push({
+        // PersonalTrace.traces.push({
         //     "type": "seek",
         //     "vtime": getCurrentTime(),
         //     "time": new Date(),
@@ -55,43 +51,10 @@ var Player = function ($, window, document) {
         return video.currentTime;
     }
 
-    function addSegment() {
-        var start;
-        var end;
-        var segStart;
-        var segEnd;
-        for (var i = 0; i < traces.length; i++) {
-            if (!traces[i]["processed"] && traces[i]["type"] == "play"){
-                start = traces[i];
-                // if the last one, return because it's still waiting for end
-                if (i == traces.length - 1)
-                    return;
-                end = traces[i + 1];
-                break;
-            }
-        }
-        // console.log("TRACE", start, end, getTimeDiff(end["time"], start["time"]));
-        start["processed"] = true;
-        // add the segment to the timeline
-        if (end["type"] == "pause") {
-            // console.log("play-pause", start["vtime"], end["vtime"]);
-            segStart = start["vtime"];
-            segEnd = end["vtime"];
-            end["processed"] = true;
-        } else if (end["type"] == "play") {
-            // console.log("play-play", start["vtime"], start["vtime"] + getTimeDiff(end["time"], start["time"]));
-            segStart = start["vtime"];
-            segEnd = start["vtime"] + getTimeDiff(end["time"], start["time"]);
-        }
-        Timeline.addSegment(segStart, segEnd, tid);
-        tid += 1;
-        // isSegmentOn = false;
-    }
-
     function play() {
         video.play();
         $(playButton).removeClass("play-display").addClass("pause-display");
-        traces.push({
+        PersonalTrace.traces.push({
             "type": "play",
             "vtime": getCurrentTime(),
             "time": new Date(),
@@ -99,7 +62,7 @@ var Player = function ($, window, document) {
         });
         // if (!isSegmentOn)
         //     isSegmentOn = true;
-        addSegment();
+        PersonalTrace.addSegment();
     }
 
     function playUntil(newTime, speed) {
@@ -120,7 +83,7 @@ var Player = function ($, window, document) {
             return;
         video.pause();
         $(playButton).removeClass("pause-display").addClass("play-display");
-        traces.push({
+        PersonalTrace.traces.push({
             "type": "pause",
             "vtime": getCurrentTime(),
             "time": new Date(),
@@ -128,7 +91,7 @@ var Player = function ($, window, document) {
         });
         // if (!isSegmentOn)
         //     isSegmentOn = true;
-        addSegment();
+        PersonalTrace.addSegment();
     }
 
     function changeSpeed(rate) {
@@ -374,7 +337,6 @@ var Player = function ($, window, document) {
     return {
         init: init,
         seekTo: seekTo,
-        traces: traces,
         getCurrentTime: getCurrentTime,
         pause: pause,
         play: play,

@@ -68,6 +68,8 @@ var Transcript = function ($, window, document) {
 
     // unlock scroll if no scroll for 5 seconds && in current viewport
     function checkScroll() {
+        if ($(".transcript-entry.current").length === 0)
+            return;
         // offset: location of "current" in respect to transcript
         var offset = document.querySelector(".transcript-entry.current").getBoundingClientRect().top - document.querySelector("#transcript").getBoundingClientRect().top;
         // console.log("scrollCount", scrollLockCount, offset);
@@ -238,7 +240,9 @@ var Transcript = function ($, window, document) {
         });
         s.value = "";
         // back to the original graph
-        $("#vis-options a").eq(6).trigger("click");
+        // $("#vis-options a").eq(6).trigger("click");
+        Timeline.drawPlayVis(data["play_kde"], duration);
+        Highlight.updatePeakColor();
         Highlight.displayPeaks(peaks);
         $(".search-cancel").addClass("hide");
         Peak.searchPeaks = [];
