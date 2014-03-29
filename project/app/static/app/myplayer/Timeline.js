@@ -325,6 +325,8 @@ var Timeline = function ($, window, document) {
                 .attr("class", "databar peak-databar brushing");
         }
         $("#peak_" + peak["uid"]).addClass("brushing");
+        if (peak["uid"] == $("#prev-frame").data("uid"))
+            $("#prev-frame").addClass("brushing");
     }
 
     function removeDatabarBrushing (peak) {
@@ -334,6 +336,8 @@ var Timeline = function ($, window, document) {
                 .attr("class", "databar peak-databar");
         }
         $("#peak_" + peak["uid"]).removeClass("brushing");
+        if (peak["uid"] == $("#prev-frame").data("uid"))
+            $("#prev-frame").removeClass("brushing");
     }
 
     /* Render the heatmap visualization */

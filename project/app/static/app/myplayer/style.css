@@ -169,9 +169,34 @@ body {
     /*opacity: 0.7;*/
 }
 
+#prev-frame img {
+    border-top: 5px solid transparent;
+}
+
+#prev-frame:hover img {
+    /*background-color: yellow;*/
+    border-top: 5px solid yellow;
+}
+
+#prev-frame.brushing img {
+    /*background-color: yellow;*/
+    border-top: 5px solid yellow;
+}
+
+#prev-frame .pip-icon {
+    background-image: url(../img/pin.png);
+    display: inline-block;
+    float: left;
+    width: 28px;
+    height: 28px;
+    background-position: 0px -5px;
+    background-size: 120% 120%;
+    background-repeat: no-repeat;
+}
+
 #prev-frame.pip-big {
     width: 430px;
-    margin-top: 19px;
+    margin-top: 11px;
 }
 
 #prev-frame.pip-small {
@@ -918,12 +943,17 @@ input.from-others + label:before {
 
 .screenshot:hover .screenshot-pin {
     /*display: inline-block;*/
-    background-image: url(/static/app/img/pin.png);
+    background-image: url(../img/pin.png);
 }
 
 .screenshot.active .screenshot-pin {
     /*display: inline-block;*/
-    background-image: url(/static/app/img/pin.png);
+    /*background-image: url(/static/app/img/pin.png);*/
+}
+
+.screenshot.pinned .screenshot-pin {
+    /*display: inline-block;*/
+    background-image: url(../img/pin.png);
 }
 
 .screenshot-pin {

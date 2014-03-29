@@ -36,12 +36,13 @@ var Highlight = function ($, window, document) {
         $(document).on("click", ".screenshot", screenshotClickHandler);
         $(document).on("mouseenter", ".screenshot", screenshotMouseenterHandler);
         $(document).on("mouseleave", ".screenshot", screenshotMouseleaveHandler);
-        $(document).on("dragend", ".screenshot", screenshotDragendHandler);
+        $(document).on("dragend", ".screenshot", screenshotPinClickHandler);
         $(document).on("click", ".screenshot-pin", screenshotPinClickHandler);
         $(document).on("click", ".pip-cancel", pipCancelClickHandler);
         $(document).on("click", ".pip-smaller", pipSmallerClickHandler);
         $(document).on("click", ".pip-bigger", pipBiggerClickHandler);
-        // $(document).on("click", ".pin-pip", pinClickHandler);
+        $(document).on("mouseenter", "#prev-frame", pipMouseenterHandler);
+        $(document).on("mouseleave", "#prev-frame", pipMouseleaveHandler);
         $(document).on("click", "#add-bookmark-button", addBookmarkButtonClickHandler);
         $(document).on("click", "#save-bookmark-button", saveBookmarkButtonClickHandler);
         $(document).on("click", "#cancel-bookmark-button", cancelBookmarkButtonClickHandler);
@@ -137,6 +138,8 @@ var Highlight = function ($, window, document) {
         if (typeof activePeak !== "undefined"){
             // console.log("match", activePeak[1]);
             $("#peak_" + activePeak["uid"]).addClass("active");
+            // show pip
+            // $("#peak_" + activePeak["uid"]).find(".screenshot-pin").trigger("click");
             refreshScrollbar();
         } else {
             // console.log("no match");
@@ -166,12 +169,15 @@ var Highlight = function ($, window, document) {
     function screenshotMouseenterHandler(){
         $(this).find(".tooltip").show();
         $(this).addClass("brushing");
+        console.log($(this).data("uid"));
         // find corresponding timeline mark
         $("#timeline-peak-" + $(this).data("uid")).addClass("brushing");
         // brushing on the timeline itself
         var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
         if (typeof peak !== "undefined")
             Timeline.addDatabarBrushing(peak);
+        if ($("#prev-frame").data("uid") == $(this).data("uid"))
+            $("#prev-frame").addClass("brushing");
     }
 
     function screenshotMouseleaveHandler(){
@@ -183,9 +189,11 @@ var Highlight = function ($, window, document) {
         var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
         if (typeof peak !== "undefined")
             Timeline.removeDatabarBrushing(peak);
+        if ($("#prev-frame").data("uid") == $(this).data("uid"))
+            $("#prev-frame").removeClass("brushing");
     }
 
-    function displayPip(img) {
+    function displayPip(img, uid) {
         var isPipSmall = $("#prev-frame").hasClass("pip-small");
         if (isPipSmall)
             $("#video").addClass("pip-small");
@@ -195,20 +203,29 @@ var Highlight = function ($, window, document) {
         $("<img/>")
             .attr("src", img.src)
             .appendTo($("#prev-frame"));
-        $("#prev-frame").show();
-
+        $("#prev-frame")
+            .data("uid", uid)
+            .show();
     }
 
-    function screenshotDragendHandler(e){
-        console.log("dragend", e.target);
-        displayPip(e.target);
-    }
+    // function screenshotDragendHandler(e){
+    //     // console.log("dragend", e.target);
+    //     // displayPip(e.target);
+    //     var $screenshot = $(this).closest(".screenshot").find("img");
+    //     $(".screenshot").removeClass("pinned");
+    //     $(this).closest(".screenshot").addClass("pinned");
+    //     if ($screenshot.length === 1)
+    //         displayPip($screenshot[0]);
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    // }
 
     function screenshotPinClickHandler(e){
-        var $screenshot = $(this).closest(".screenshot").find("img");
-        console.log($screenshot.length);
-        if ($screenshot.length === 1)
-            displayPip($screenshot[0]);
+        var $screenshot = $(this).closest(".screenshot");
+        $(".screenshot").removeClass("pinned");
+        $screenshot.addClass("pinned");
+        if ($screenshot.find("img").length === 1)
+            displayPip($screenshot.find("img")[0], $screenshot.data("uid"));
         e.preventDefault();
         e.stopPropagation();
     }
@@ -218,6 +235,7 @@ var Highlight = function ($, window, document) {
         $("#video").removeClass("pip-small pip-big");
         $("#prev-frame img").remove();
         $("#prev-frame").hide();
+        $(".screenshot").removeClass("pinned");
     }
 
     function pipSmallerClickHandler() {
@@ -230,25 +248,48 @@ var Highlight = function ($, window, document) {
         $("#video").removeClass("pip-small").addClass("pip-big");
     }
 
-    function pinClickHandler(e) {
-        var $screenshot = $(this).closest(".screenshot").find("img");
-        console.log($screenshot.length);
-        if ($screenshot.length === 1)
-            displayPip($screenshot[0]);
-        e.preventDefault();
-        e.stopPropagation();
+    function pipMouseenterHandler() {
+        // $(this).addClass("brushing");
+        var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
+        if (typeof peak !== "undefined")
+            Timeline.addDatabarBrushing(peak);
+        // find corresponding screenshot
+        $(".screenshot.pinned").addClass("brushing");
     }
+
+    function pipMouseleaveHandler() {
+        // $(this).addClass("brushing");
+        var peak = Peak.getInteractionPeakByUID($(this).data("uid"));
+        if (typeof peak !== "undefined")
+            Timeline.removeDatabarBrushing(peak);
+        // find corresponding screenshot
+        $(".screenshot.pinned").removeClass("brushing");
+    }
+
+    // function pinClickHandler(e) {
+    //     var $screenshot = $(this).closest(".screenshot").find("img");
+    //     console.log($screenshot.length);
+    //     if ($screenshot.length === 1)
+    //         displayPip($screenshot[0]);
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    // }
 
     function timelinePeakMouseenterHandler(){
         $(this).addClass("brushing");
+        console.log($(this).data("uid"));
         // find corresponding screenshot
         $("#peak_" + $(this).data("uid")).addClass("brushing");
+        if ($("#prev-frame").data("uid") == $(this).data("uid"))
+            $("#prev-frame").addClass("brushing");
     }
 
     function timelinePeakMouseleaveHandler(){
         $(this).removeClass("brushing");
         // find corresponding screenshot
         $("#peak_" + $(this).data("uid")).removeClass("brushing");
+        if ($("#prev-frame").data("uid") == $(this).data("uid"))
+            $("#prev-frame").removeClass("brushing");
     }
 
     function timelinePeakClickHandler(){
