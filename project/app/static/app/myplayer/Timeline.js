@@ -47,6 +47,7 @@ var Timeline = function ($, window, document) {
         // var force = dx*dx + dy*dy;
         var force = dx*dx;
         var speed = Math.min(16, force / 10000);
+        speed = Math.max(0.5, speed);
         console.log("force", force, "speed", speed);
 
         // 3) play a "quick" preview based on the speed from 2)
@@ -74,6 +75,7 @@ var Timeline = function ($, window, document) {
             return;
         isChartMouseDown = false;
         isDragging = false;
+        Player.hideOverlay();
         var leftOffset = e.pageX - $("svg.chart").offset().left;
         //var second = Math.floor(d3.mouse(e)[0] * duration / visWidth);
         var second = Math.floor(leftOffset * duration / visWidth);
@@ -166,8 +168,9 @@ var Timeline = function ($, window, document) {
         var chart = d3.selectAll("svg.play-chart");
         var newX = curMousePos.x;
         var newTime = parseInt(newX * duration / chart.attr("width"));
-        var curTime = Player.getCurrentTime();
-
+        // var curTime = Player.getCurrentTime();
+        var curTime = Player.getPhantomTime();
+        Player.showOverlay();
         // var playhead = d3.selectAll("svg.play-chart .playhead");
         // var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
         // var newY = getAltitude(newTime);
@@ -176,10 +179,12 @@ var Timeline = function ($, window, document) {
         if (Peak.isInteractionPeak(curTime)) {
             // var penalty = 0.1;
             // var adjustedTime = curTime + penalty * (newTime - curTime);
-            var unit = newTime - curTime > 0 ? Math.min(0.15, newTime - curTime) : Math.max(-0.15, newTime - curTime);
+            var unit = newTime - curTime > 0 ? Math.min(0.1, newTime - curTime) : Math.max(-0.1, newTime - curTime);
             var adjustedTime = curTime + unit; // static slowdown
+            // console.log(adjustedTime);
             // console.log("adjTime", adjustedTime);
-            Player.seekTo(adjustedTime);
+            // Player.seekTo(adjustedTime);
+            Player.videoTimeUpdateManual(adjustedTime);
             peakRecovery = 20;
         } else {
             if (peakRecovery > 0) {
@@ -187,9 +192,11 @@ var Timeline = function ($, window, document) {
                 var penalty = 0.05;
                 var adjustedTime = curTime + penalty * (newTime - curTime);
                 // console.log("adjTime", adjustedTime);
-                Player.seekTo(adjustedTime);
+                // Player.seekTo(adjustedTime);
+                Player.videoTimeUpdateManual(adjustedTime);
             } else {
-                Player.seekTo(newTime);
+                // Player.seekTo(newTime);
+                Player.videoTimeUpdateManual(newTime);
             }
         }
     }

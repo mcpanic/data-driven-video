@@ -122,6 +122,29 @@ var Highlight = function ($, window, document) {
         }
     }
 
+    function updatePip(time) {
+        var activePeak;
+        // visual peaks are often very short, so add a 1-second slack to make sure we don't miss any.
+        var vPeak = Peak.getVisualPeakAt(time, 2, 0);
+        if (typeof vPeak === "undefined")
+            return;
+        var iPeak = Peak.getInteractionPeakAt(time);
+        if (typeof iPeak !== "undefined") {
+            console.log("iPeak and vPeak detected", iPeak, vPeak, time);
+            if (iPeak["top"] <= vPeak["top"]) {
+                console.log("iPeak <= vTran, update PIP");
+                $("#peak_" + iPeak["uid"]).find(".screenshot-pin").trigger("click");
+            } else {
+                console.log("vTran < iPeak, do not update PIP");
+                hidePip();
+            }
+        } else {
+            console.log("vPeak only", time);
+            hidePip();
+        }
+    }
+
+
     function updateScreenshot(time) {
         var activePeak;
         var peaks = getCurrentPeaks();
@@ -133,7 +156,6 @@ var Highlight = function ($, window, document) {
                 activePeak = peaks[i];
         }
         // check if we need an update.
-        // if (activePeak[])
         $(".screenshot.active").removeClass("active");
         if (typeof activePeak !== "undefined"){
             // console.log("match", activePeak[1]);
@@ -145,6 +167,7 @@ var Highlight = function ($, window, document) {
             // console.log("no match");
         }
     }
+
 
     function hideBookmarkPanel(){
             $("#bookmark-popup").hide();
@@ -169,7 +192,6 @@ var Highlight = function ($, window, document) {
     function screenshotMouseenterHandler(){
         $(this).find(".tooltip").show();
         $(this).addClass("brushing");
-        console.log($(this).data("uid"));
         // find corresponding timeline mark
         $("#timeline-peak-" + $(this).data("uid")).addClass("brushing");
         // brushing on the timeline itself
@@ -206,6 +228,9 @@ var Highlight = function ($, window, document) {
         $("#prev-frame")
             .data("uid", uid)
             .show();
+        Player.videoWidth = $("#video").width();
+        Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
+        Player.updateVideoOverlay();
     }
 
     // function screenshotDragendHandler(e){
@@ -230,22 +255,36 @@ var Highlight = function ($, window, document) {
         e.stopPropagation();
     }
 
-
-    function pipCancelClickHandler() {
+    function hidePip() {
+        if (!$("#prev-frame").is(":visible"))
+            return;
         $("#video").removeClass("pip-small pip-big");
         $("#prev-frame img").remove();
         $("#prev-frame").hide();
         $(".screenshot").removeClass("pinned");
+        Player.videoWidth = Player.videoOrgWidth;
+        Player.videoHeight = Player.videoOrgHeight;
+        Player.updateVideoOverlay();
+    }
+
+    function pipCancelClickHandler() {
+        hidePip();
     }
 
     function pipSmallerClickHandler() {
         $("#prev-frame").removeClass("pip-big").addClass("pip-small");
         $("#video").removeClass("pip-big").addClass("pip-small");
+        Player.videoWidth = $("#video").width();
+        Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
+        Player.updateVideoOverlay();
     }
 
     function pipBiggerClickHandler() {
         $("#prev-frame").removeClass("pip-small").addClass("pip-big");
         $("#video").removeClass("pip-small").addClass("pip-big");
+        Player.videoWidth = $("#video").width();
+        Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
+        Player.updateVideoOverlay();
     }
 
     function pipMouseenterHandler() {
@@ -362,7 +401,7 @@ var Highlight = function ($, window, document) {
 
     function displayPeaks(){
         var peaks = getCurrentPeaks();
-        console.log(peaks);
+        console.log("PEAKS", peaks);
         $(".screenshot").remove();
         $("#timeline .timeline-peak").remove();
         peaks.sort(Peak.sortPeaksByTime);
@@ -443,6 +482,7 @@ var Highlight = function ($, window, document) {
         // isPeak: isPeak,
         displayPeaks: displayPeaks,
         updateScreenshot: updateScreenshot,
+        updatePip: updatePip,
         updatePeakColor: updatePeakColor,
         getThumbnailUrl: getThumbnailUrl,
         api: api

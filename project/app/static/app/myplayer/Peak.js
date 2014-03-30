@@ -62,6 +62,15 @@ var Peak = function ($, window, document) {
         return false;
     }
 
+    function isVisualPeak(time) {
+        var i;
+        for (i in Peak.visualPeaks) {
+            if (Peak.visualPeaks[i]["start"] <= time && time <= Peak.visualPeaks[i]["end"])
+                return true;
+        }
+        return false;
+    }
+
     function isSearchPeak(time) {
         var i;
         for (i in Peak.searchPeaks) {
@@ -80,31 +89,46 @@ var Peak = function ($, window, document) {
         return false;
     }
 
-    function getInteractionPeakAt(time) {
-        var i;
-        var peak;
+    function getInteractionPeakAt(time, slackBefore, slackAfter) {
+        var peak, start, end, i;
         for (i in Peak.interactionPeaks) {
-            if (Peak.interactionPeaks[i]["start"] <= time && time <= Peak.interactionPeaks[i]["end"])
+            start = typeof slackBefore === "undefined" ? Peak.interactionPeaks[i]["start"] : Peak.interactionPeaks[i]["start"] - slackBefore;
+            end = typeof slackAfter === "undefined" ? Peak.interactionPeaks[i]["end"] : Peak.interactionPeaks[i]["end"] + slackAfter;
+            if (start <= time && time <= end)
                 peak = Peak.interactionPeaks[i];
         }
         return peak;
     }
 
-    function getSearchPeakAt(time) {
-        var i;
-        var peak;
+    function getVisualPeakAt(time, slackBefore, slackAfter) {
+        var peak, start, end, i;
+        for (i in Peak.visualPeaks) {
+            start = typeof slackBefore === "undefined" ? Peak.visualPeaks[i]["start"] : Peak.visualPeaks[i]["start"] - slackBefore;
+            end = typeof slackAfter === "undefined" ? Peak.visualPeaks[i]["end"] : Peak.visualPeaks[i]["end"] + slackAfter;
+            if (start <= time && time <= end)
+                peak = Peak.visualPeaks[i];
+        }
+        return peak;
+    }
+
+    function getSearchPeakAt(time, slackBefore, slackAfter) {
+        var peak, start, end, i;
         for (i in Peak.searchPeaks) {
-            if (Peak.searchPeaks[i]["start"] <= time && time <= Peak.searchPeaks[i]["end"])
+            start = typeof slackBefore === "undefined" ? Peak.searchPeaks[i]["start"] : Peak.searchPeaks[i]["start"] - slackBefore;
+            end = typeof slackAfter === "undefined" ? Peak.searchPeaks[i]["end"] : Peak.searchPeaks[i]["end"] + slackAfter;
+            if (start <= time && time <= end)
                 peak = Peak.searchPeaks[i];
         }
         return peak;
     }
 
-    function getBookmarkPeakAt(time) {
-        var i;
-        var peak;
+    function getBookmarkPeakAt(time, slackBefore, slackAfter) {
+        var peak, start, end, i;
+
         for (i in Peak.bookmarkPeaks) {
-            if (Peak.bookmarkPeaks[i]["start"] <= time && time <= Peak.bookmarkPeaks[i]["end"])
+            start = typeof slackBefore === "undefined" ? Peak.bookmarkPeaks[i]["start"] : Peak.bookmarkPeaks[i]["start"] - slackBefore;
+            end = typeof slackAfter === "undefined" ? Peak.bookmarkPeaks[i]["end"] : Peak.bookmarkPeaks[i]["end"] + slackAfter;
+            if (start <= time && time <= end)
                 peak = Peak.bookmarkPeaks[i];
         }
         return peak;
@@ -116,6 +140,16 @@ var Peak = function ($, window, document) {
         for (i in Peak.interactionPeaks) {
             if (Peak.interactionPeaks[i]["uid"] == uid)
                 peak = Peak.interactionPeaks[i];
+        }
+        return peak;
+    }
+
+    function getVisualPeakByUID(uid) {
+        var i;
+        var peak;
+        for (i in Peak.visualPeaks) {
+            if (Peak.visualPeaks[i]["uid"] == uid)
+                peak = Peak.visualPeaks[i];
         }
         return peak;
     }
@@ -157,17 +191,21 @@ var Peak = function ($, window, document) {
     return {
         init: init,
         interactionPeaks: interactionPeaks,
+        visualPeaks: visualPeaks,
         searchPeaks: searchPeaks,
         bookmarkPeaks: bookmarkPeaks,
         assignSearchUID: assignSearchUID,
         getNewBookmarkUID: getNewBookmarkUID,
         isInteractionPeak: isInteractionPeak,
+        isVisualPeak: isVisualPeak,
         isSearchPeak: isSearchPeak,
         isBookmarkPeak: isBookmarkPeak,
         getInteractionPeakAt: getInteractionPeakAt,
+        getVisualPeakAt: getVisualPeakAt,
         getSearchPeakAt: getSearchPeakAt,
         getBookmarkPeakAt: getBookmarkPeakAt,
         getInteractionPeakByUID: getInteractionPeakByUID,
+        getVisualPeakByUID: getVisualPeakByUID,
         getSearchPeakByUID: getSearchPeakByUID,
         getBookmarkPeakByUID: getBookmarkPeakByUID,
         isPeak: isPeak,

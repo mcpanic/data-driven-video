@@ -22,10 +22,42 @@ var Player = function ($, window, document) {
     var lastTimeUpdate = -1000; // force trigger the first time
     var isPeak = false;
 
+    var phantomTime = 0;
+    var videoWidth = 0;
+    var videoHeight = 0;
+    var videoOrgWidth = 0;
+    var videoOrgHeight = 0;
+
     function init(videoUrl) {
         bindEvents();
         load(videoUrl);
         muteButton.click();
+    }
+
+    var loadedImages = 0;
+    var imageArray = [];
+
+    function preloadThumbnails() {
+        var i, tempImage;
+        for (i = 0; i < duration; i++) {
+            imageArray.push(Highlight.getThumbnailUrl(i));
+        }
+        for (i = 0; i < imageArray.length; i++) {
+            tempImage = new Image();
+            tempImage.addEventListener("load", trackProgress, true);
+            tempImage.src = imageArray[i];
+        }
+    }
+
+    function trackProgress() {
+        loadedImages += 1;
+        if (loadedImages === imageArray.length) {
+            imagesLoaded();
+        }
+    }
+
+    function imagesLoaded() {
+        console.log("All thumbnails preloaded");
     }
 
     function load(videoUrl) {
@@ -49,6 +81,10 @@ var Player = function ($, window, document) {
 
     function getCurrentTime() {
         return video.currentTime;
+    }
+
+    function getPhantomTime() {
+        return phantomTime;
     }
 
     function play() {
@@ -99,7 +135,18 @@ var Player = function ($, window, document) {
         $(speedButton).text(rate.toFixed(1) + "x");
     }
 
+    function videoLoadmetadataHandler() {
+        Player.videoWidth = Player.videoOrgWidth = this.videoWidth;
+        Player.videoHeight = Player.videoOrgHeight = this.videoHeight;
+        // Player.aspectRatio = Player.videoWidth / Player.videoHeight;
+        // $("#video-overlay").css("width", Player.videoWidth).css("height", Player.videoHeight);
+        // $("#video").css("width", Player.videoWidth).css("height", Player.videoHeight);
+        updateVideoOverlay();
+        console.log(Player.videoWidth, Player.videoHeight);
+    }
+
     function bindEvents() {
+        video.addEventListener("loadedmetadata", videoLoadmetadataHandler);
         playButton.addEventListener("click", playButtonClickHandler);
         muteButton.addEventListener("click", muteButtonClickHandler);
         fullScreenButton.addEventListener("click", fullScreenButtonClickHandler);
@@ -188,6 +235,152 @@ var Player = function ($, window, document) {
 
 
 
+    function videoTimeUpdateManual(newTime) {
+        // if (isPlayUntil)
+        //     console.log("update", video.currentTime, video.playbackRate);
+        // Calculate the slider value
+        var value = (100 / video.duration) * newTime;
+        var intCurrentTime = parseInt(newTime);
+
+        $("#time-display").text(formatSeconds(newTime));
+
+        // update transcript
+        Transcript.update(intCurrentTime);
+
+        // Things that don't need updates every time.
+        // Currently happnening every 2 seconds.
+        // TODO: make efficient. reduce looping. group same time topics into a single object
+        if (lastTimeUpdate - intCurrentTime < -2 || lastTimeUpdate - intCurrentTime > 2){
+            lastTimeUpdate = intCurrentTime;
+            // console.log("checking");
+
+            if (typeof Topicflow.currentTopic === "undefined") {
+                // console.log("first time");
+                Topicflow.displayTopics(intCurrentTime);
+            } else {
+                if (intCurrentTime * 1000 <= Topicflow.currentTopic["start"] || intCurrentTime  * 1000 >= Topicflow.currentTopic["end"]){
+                    // console.log("topic changed");
+                    Topicflow.displayTopics(intCurrentTime);
+                }
+            }
+
+            // Highlight.updateScreenshot(video.currentTime);
+            Highlight.updatePip(intCurrentTime);
+        }
+/*
+        // slow down for hills
+        if (isPlayUntil){
+            var adjustedSpeed;
+            if (Peak.isPeak(video.currentTime)){
+                adjustedSpeed = video.playbackRate / 4; // Math.max(0.5, video.playbackRate / 4);
+                console.log("PEAK ALERT", adjustedSpeed);
+                // trigger only for the first time
+                if (isPeak == false){
+                    changeSpeed(adjustedSpeed);
+                    if (video.currentTime + adjustedSpeed > playUntilTime)
+                        video.currentTime = playUntilTime;
+                    else
+                        video.currentTime += adjustedSpeed;
+                } else {
+                    // normal dragging: move a bit.
+                    adjustedSpeed = video.playbackRate; // Math.max(0.5, video.playbackRate);
+                    changeSpeed(adjustedSpeed);
+                    if (video.currentTime + adjustedSpeed > playUntilTime)
+                        video.currentTime = playUntilTime;
+                    else
+                        video.currentTime += adjustedSpeed;
+                }
+                isPeak = true;
+            } else {
+                adjustedSpeed = video.playbackRate * 4; // Math.max(0.5, video.playbackRate * 4);
+                // trigger only for the first time
+                if (isPeak == true){
+                    console.log("jumping", adjustedSpeed);
+                    changeSpeed(adjustedSpeed);
+                    if (video.currentTime + adjustedSpeed > playUntilTime)
+                        video.currentTime = playUntilTime;
+                    else
+                        video.currentTime += adjustedSpeed;
+                } else {
+                    // normal dragging: move a bit.
+                    adjustedSpeed = video.playbackRate; //Math.max(0.5, video.playbackRate);
+                    changeSpeed(adjustedSpeed);
+                    if (video.currentTime + adjustedSpeed > playUntilTime)
+                        video.currentTime = playUntilTime;
+                    else
+                        video.currentTime += adjustedSpeed;
+                }
+                isPeak = false;
+            }
+        }
+*/
+        // only when in the interaction peaks
+        if (Peak.isPeak(newTime)) {
+            $(".playbar").attr("class", "playbar dragging peak");
+        } else {
+            $(".playbar").attr("class", "playbar");
+        }
+
+        if (isPlayUntil){
+            if ((video.playbackRate > 0 && playUntilTime <= intCurrentTime) || (video.playbackRate < 0 && playUntilTime >= intCurrentTime)){
+                // pause();
+                $(".playbar").attr("class", "playbar");
+                console.log("play until complete");
+                isPlayUntil = false;
+                isPeak = false;
+                changeSpeed(1);
+                play();
+            }
+        }
+
+        // show phantom frame
+        $("#video-overlay img").attr("src", Highlight.getThumbnailUrl(intCurrentTime));
+        // console.log($("#video").position().top, $("#video").position().left, $("#video").width(), $("#video").height());
+
+        /*
+        if ($("#prev-frame").is(":visible")) {
+            $("#video-overlay").css("width", "560px");
+            $("#video-overlay")
+                .css("top", $("#video").position().top + ($("#video").height() - $("#video-overlay").height()) / 2)
+                .css("left", $("#video").position().left + ($("#video").width() - $("#video-overlay").width()) / 2)
+                // .css("width", "560px")
+                .css("height", "auto")
+                // .css("width", $("#video").width())
+                // .css("height", $("#video").height())
+                .show();
+        } else {
+            $("#video-overlay")
+                .css("top", $("#video").position().top + ($("#video").height() - videoHeight) / 2)
+                .css("left", $("#video").position().left + ($("#video").width() - videoWidth) / 2)
+                .css("width", videoWidth)
+                .css("height", videoHeight)
+                // .css("width", $("#video").width())
+                // .css("height", $("#video").height())
+                .show();
+        }*/
+        // Update the slider and playhead
+        seekBar.value = value;
+        Timeline.movePlayhead(newTime);
+        phantomTime = newTime;
+    }
+
+
+    function updateVideoOverlay() {
+        $("#video")
+            .css("margin-left", $("#video").position().left + ($("#video-container").width() - Player.videoWidth) / 2)
+            .css("margin-top", (Player.videoOrgHeight - Player.videoHeight) / 2)
+            .css("margin-bottom", (Player.videoOrgHeight - Player.videoHeight) / 2)
+            .css("width", Player.videoWidth)
+            .css("height", Player.videoHeight);
+        var videoBox = document.querySelector("#video").getBoundingClientRect();
+        // console.log(videoBox, Player.videoWidth, Player.videoHeight);
+        $("#video-overlay")
+            .css("left", videoBox.left)
+            .css("top", videoBox.top)
+            .css("width", videoBox.right - videoBox.left)
+            .css("height", videoBox.bottom - videoBox.top);
+    }
+
     // Update the seek bar as the video plays
     function videoTimeUpdateHandler() {
         // if (isPlayUntil)
@@ -204,7 +397,7 @@ var Player = function ($, window, document) {
         // Things that don't need updates every time.
         // Currently happnening every 2 seconds.
         // TODO: make efficient. reduce looping. group same time topics into a single object
-        if (lastTimeUpdate - intCurrentTime < -3 || lastTimeUpdate - intCurrentTime > 3){
+        if (lastTimeUpdate - intCurrentTime < -2 || lastTimeUpdate - intCurrentTime > 2){
             lastTimeUpdate = intCurrentTime;
             // console.log("checking");
 
@@ -218,7 +411,8 @@ var Player = function ($, window, document) {
                 }
             }
 
-            Highlight.updateScreenshot(video.currentTime);
+            // Highlight.updateScreenshot(video.currentTime);
+            Highlight.updatePip(video.currentTime);
         }
 /*
         // slow down for hills
@@ -334,13 +528,31 @@ var Player = function ($, window, document) {
         video.playbackRate = newSpeed;
     }
 
+    function showOverlay() {
+        $("#video-overlay").show();
+    }
+
+    function hideOverlay() {
+        $("#video-overlay").hide();
+    }
+
     return {
+        videoWidth: videoWidth,
+        videoHeight: videoHeight,
+        videoOrgWidth: videoOrgWidth,
+        videoOrgHeight: videoOrgHeight,
         init: init,
+        preloadThumbnails: preloadThumbnails,
         seekTo: seekTo,
         getCurrentTime: getCurrentTime,
         pause: pause,
         play: play,
         playUntil: playUntil,
-        changeSpeed: changeSpeed
+        changeSpeed: changeSpeed,
+        videoTimeUpdateManual: videoTimeUpdateManual,
+        getPhantomTime: getPhantomTime,
+        updateVideoOverlay: updateVideoOverlay,
+        showOverlay: showOverlay,
+        hideOverlay: hideOverlay
     }
 }(jQuery, window, document);

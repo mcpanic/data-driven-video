@@ -12,16 +12,12 @@
 
 <body>
 <div class="container">
-<!--     <header>
-
-    </header>
- -->
     <div id="tabs" class="clearfix">
-        <!-- < class="title"> -->
-        <!-- </h2> -->
+        <!--
         <div><a class="tab-item" href="#" data-mode="heatmap">Watch Video</a></div>
         <div><a class="tab-item" href="#" data-mode="summary">View Stats</a></div>
-        <!-- <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div> -->
+        <div><a class="tab-item" href="#" data-mode="views">Views Over Time</a></div>
+        -->
         <div class="brand">LectureScape</div>
         <div class="nav">
             <div class="prev"><a href="#">&lt; Prev</a></div>
@@ -34,7 +30,7 @@
         <span class="search-summary"></span>
 
     </div>
-
+<!--
     <section id="stats">
         <h3>Summary</h3>
         <div class="clearfix">
@@ -76,37 +72,17 @@
             </tr>
         </table>
     </section>
-
+-->
     <section id="play-vis">
         <div id="leftpane">
             <div class="video-title"></div>
-            <!-- <h3>Video</h3> -->
-            <!-- <h3 id="subgoal">&nbsp;</h3> -->
-                 <!-- <video id="vid3" src="" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
-                </video> -->
-            <!-- <video id="example_video_1" class="video-js vjs-default-skin"
-              controls preload="auto" width="640" height="264"
-              poster="http://video-js.zencoder.com/oceans-clip.png"
-              data-setup='{"example_option":true}'>
-             <source src="http://video-js.zencoder.com/oceans-clip.mp4" type='video/mp4' />
-             <source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm' />
-             <source src="http://video-js.zencoder.com/oceans-clip.ogv" type='video/ogg' />
-            </video>  -->
-<!--             <div class="flowplayer">
-                <video>
-                 <source type="video/webm" src="${staticfiles_storage.url('djmodules/video_analytics/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4')}">
-                 <source type="video/mp4" src="${staticfiles_storage.url('djmodules/video_analytics/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4')}">
-                 <source type="video/ogv" src="${staticfiles_storage.url('djmodules/video_analytics/videos/6.00x/M-600X-FA12-L23-5_100-yml22-pGOc4.mp4')}">
-                </video>
-            </div> -->
-
             <div id="video-container">
                 <div id="video-top">
                     <span id="prev-topic"></span>
                     <span id="current-topic"></span>
                     <span id="next-topic"></span>
                 </div>
-                <div id="video-overlay">overlay text</div>
+                <div id="video-overlay"><img/></div>
                 <!-- Video -->
                 <div id="prev-frame" class="pip-small">
                     <span class="pip-icon"></span>
@@ -114,23 +90,20 @@
                     <span class="pip-bigger"></span>
                     <span class="pip-smaller"></span>
                 </div>
-                <video id="video" class="clearfix" width="540" height="330">
+
+                <video id="video" class="clearfix" width="540" height="360">
         <!--          <source src="videos/mikethefrog.webm" type="video/webm">
                   <source src="videos/mikethefrog.ogv" type="video/ogv"> -->
  <!--                  <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4" type="video/mp4"> -->
                   <!-- <source src="http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L24-1_100-LYbCruklFEQ.mp4" type="video/mp4"> -->
-                  <p>
-                    Your browser doesn't support HTML5 video.
-                    <a href="videos/mikethefrog.mp4">Download</a> the video instead.
-                  </p>
+                  <p>Your browser doesn't support HTML5 video.</p>
                 </video>
-<!--                 <div id="next-frame"></div> -->
+
                 <div id="timeline"></div>
 
                 <!-- Video Controls -->
                 <div id="video-controls">
                     <input type="range" id="seek-bar" value="0">
-                    <!--<br/>-->
                     <span id="play-pause" class="player-icon play pause-display"></span>
                     <span id="time-display">0:00</span> <span id="duration-display"></span>
                     <span id="mute" class="player-icon volume-high-display"></span>
@@ -142,20 +115,18 @@
                         <div class="speed-option" data-speed="4.0">4.0x</div>
                         <div class="speed-option" data-speed="8.0">8.0x</div>
                     </div>
-                    <!-- <div id="bookmark"> -->
-                        <span id="add-bookmark-button">Add Highlight</span>
-                    <!-- </div> -->
+                    <span id="add-bookmark-button">Add Bookmark</span>
                     <span id="full-screen" class="player-icon fullscreen-display"></span>
                 </div>
             </div>
 
-<div id="bookmark-popup">
-    <div id="bookmark-thumbnail"></div>
-    <div id="bookmark-time"></div>
-    <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
-    <button id="save-bookmark-button">Save</button>
-    <button id="cancel-bookmark-button">Cancel</button>
-</div>
+            <div id="bookmark-popup">
+                <div id="bookmark-thumbnail"></div>
+                <div id="bookmark-time"></div>
+                <input id="bookmark-description" type="text" length="50" placeholder="add a description"/><br/>
+                <button id="save-bookmark-button">Save</button>
+                <button id="cancel-bookmark-button">Cancel</button>
+            </div>
 
             <!-- <div id="ytplayer"></div> -->
 <!--             <div id="vis-options" class="clearfix">
@@ -171,25 +142,18 @@
         </div>
 
         <div id="rightpane"> <!-- sidebar-2 -->
-            <!-- <h3>Transcript</h3> -->
             <div id="transcript"></div>
-            <!-- <div id="transcript-scroll"></div> -->
         </div>
 
         <div id="bottompane"> <!-- sidebar-1 -->
 <!--                 <h3>Highlights
                 <small>(<span id="highlight-count"></span>)</small>
             </h3> -->
-                    <!-- <input type="checkbox"/>Visual transitions<br/>
-                    <input type="checkbox"/>Topic transitions<br/><br/>
-                    <input type="hidden" value="40" id="slider1"/> -->
             <div class="highlight-checkboxes">
                 <input class="from-me" type="checkbox" value="from-me-val" checked/>
-                <!-- <span class="by-me"></span> -->
-                <label for="from-me-val">by me</label>
+                <label for="from-me-val">my bookmarks</label>
                 <input class="from-others" type="checkbox" value="from-others-val" checked/>
-                <!-- <span class="by-others"></span> -->
-                <label for="from-others-val">by others</label>
+                <label for="from-others-val">frequently rewatched by others</label>
                 <span>&nbsp;</span>
             </div>
             <div id="highlights">
@@ -197,11 +161,11 @@
         </div>
 
     </section>
-
-
+<!--
     <section id="time-vis">
         <h3>Views Over Time</h3>
     </section>
+-->
 </div>
 
     <script src="{% static 'app/js/jquery-1.10.2.min.js' %}"></script>
@@ -233,11 +197,9 @@
     var course = "{{ course }}";
     // var urlPrefix = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/";
     var mediaUrlPrefix = "http://juhokim.com/edxanalytics/";
-
     var videoUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
     var transcriptUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";
     //"M-600X-FA12-L5-1_100-aTuYZqhEvuk.mp4";
-
     // var videoUrl = "https://s3.amazonaws.com/edx-course-videos/mit-3091x/M-3091X-FA12-L22-2_100.mp4";
     // var videoUrl = "https://s3.amazonaws.com/edx-course-videos/mit-600x/M-600X-FA12-L5-1_100.mp4"
     // var transcriptUrl = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/videos/6.00x/M-600X-FA12-L5-1_100-aTuYZqhEvuk.en.srt";
@@ -261,7 +223,6 @@
         data["play_kde"][i] = data["play_kde"][anchorVal];
     }
     data["play_kde"] = normalizeData(data["play_kde"]);
-    // var getParameterByName();
     $(document).ready(function(){
         // Load the IFrame Player API code asynchronously.
         // var tag = document.createElement('script');
@@ -273,16 +234,13 @@
         Transcript.init(transcriptUrl);
         Timeline.init(visWidth, visHeight);
         duration = getDuration(video_id);
+        Player.preloadThumbnails(); // has to wait until duration is set.
         $("#duration-display").text(" / " + formatSeconds(duration));
         Peak.init(peaks, vtran_peaks, []);
         Highlight.init();
         PersonalTrace.init();
         Topicflow.init();
-        // $("#timeline").css("margin-top", visHeight + "px");
         init();
-        // var curMargin = parseInt($(".chart").css("margin-top"));
-        // $(".play-chart").css("margin-top", (curMargin - (visHeight-135)) + "px"); // 80
-        // $("#slider1").PPSlider({width: 220});
     });
     </script>
 
