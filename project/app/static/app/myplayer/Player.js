@@ -235,7 +235,7 @@ var Player = function ($, window, document) {
     function seekBarMousemoveHandler() {
         var seekBarRect = document.querySelector("#seek-bar").getBoundingClientRect();
         var curTime = parseInt((event.pageX - seekBarRect.left) / $("#seek-bar").width() * duration);
-        console.log(curTime, event.pageX, seekBarRect.left);
+        // console.log(curTime, event.pageX, seekBarRect.left);
         $(".trace-tooltip")
             .css("top", (event.pageY+20) + "px")
             .css("left", (event.pageX-100) + "px")
