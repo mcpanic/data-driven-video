@@ -8,6 +8,16 @@ body {
     outline: none;
 }
 */
+
+#tabs, .video-title, #video-container, #transcript, [draggable] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 *:focus {
     outline: none;
 }
@@ -22,12 +32,6 @@ body {
     position: relative;
     background-color: #222;
     /*padding: 0 1em 18px 1em;*/
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 
 .brand {
@@ -185,7 +189,13 @@ body {
     cursor: pointer;
     /*opacity: 0.7;*/
 }
-
+/*
+#prev-frame.hidden {
+    opacity:0;
+    margin-left:200px !important;
+    position: absolute;
+}
+*/
 #prev-frame img {
     border-top: 5px solid transparent;
 }
@@ -825,10 +835,6 @@ svg {
     /*overflow: scroll;*/
     border: 1px solid #ddd;
     padding: 1em;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
     /* Required to make elements draggable in old WebKit */
     -khtml-user-drag: element;
     -webkit-user-drag: element;
@@ -1086,10 +1092,6 @@ input.from-others + label:before {
 }
 
 [draggable] {
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element;

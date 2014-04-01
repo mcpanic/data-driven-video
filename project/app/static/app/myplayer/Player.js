@@ -153,6 +153,8 @@ var Player = function ($, window, document) {
         seekBar.addEventListener("mousedown", seekBarMousedownHandler);
         seekBar.addEventListener("mouseup", seekBarMouseupHandler);
         seekBar.addEventListener("change", seekBarChangeHandler);
+        seekBar.addEventListener("mousemove", seekBarMousemoveHandler);
+        seekBar.addEventListener("mouseout", seekBarMouseoutHandler);
         video.addEventListener("click", videoClickHandler);
         video.addEventListener("timeupdate", videoTimeUpdateHandler);
         video.addEventListener("ended", videoEndedHandler);
@@ -227,6 +229,23 @@ var Player = function ($, window, document) {
         // console.log(time);
         // Update the video time
         video.currentTime = time;
+    }
+
+    // show thumbnail preview
+    function seekBarMousemoveHandler() {
+        var seekBarRect = document.querySelector("#seek-bar").getBoundingClientRect();
+        var curTime = parseInt((event.pageX - seekBarRect.left) / $("#seek-bar").width() * duration);
+        console.log(curTime, event.pageX, seekBarRect.left);
+        $(".trace-tooltip")
+            .css("top", (event.pageY+20) + "px")
+            .css("left", (event.pageX-100) + "px")
+            .html("<img src='" + Highlight.getThumbnailUrl(curTime) + "' class='tooltip-thumbnail'><br/>" + "[" + formatSeconds(curTime) + "]")
+            .show();
+    }
+
+
+    function seekBarMouseoutHandler() {
+        $(".trace-tooltip").hide();
     }
 
     function videoClickHandler(){

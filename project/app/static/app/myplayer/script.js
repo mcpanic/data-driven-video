@@ -166,6 +166,14 @@ function init(){
 
     // $("#speed-table th").first().trigger("click");
     //displayPeaks(peaks);
+
+    if (isControl) {
+        $("#seek-bar").show();
+        $("#video-top").hide();
+        $("#add-bookmark-button").hide();
+        $("#timeline").hide();
+        $("#bottompane").hide();
+    }
 }
 
 function multiInit(){

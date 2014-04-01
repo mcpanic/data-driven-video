@@ -84,7 +84,7 @@
                 </div>
                 <div id="video-overlay"><img/></div>
                 <!-- Video -->
-                <div id="prev-frame" class="pip-small">
+                <div id="prev-frame" class="pip-small hidden">
                     <span class="pip-icon"></span>
                     <span class="pip-cancel"></span>
                     <span class="pip-bigger"></span>
@@ -214,6 +214,10 @@
     var videos = {{videos|safe}};
     var peaks = {{peaks|safe}};
     var i;
+
+    // Detect control condition
+    var isControl = gup("control") == "1" ? true : false;
+    console.log(isControl);
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
             "http://juhokim.com:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));

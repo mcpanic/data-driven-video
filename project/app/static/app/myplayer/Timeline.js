@@ -76,7 +76,7 @@ var Timeline = function ($, window, document) {
         if (!isChartMouseDown)
             return;
         isChartMouseDown = false;
-        isDragging = false;
+        Timeline.isDragging = false;
         $(".chart").attr("class", $(".chart").attr("class").replace(" dragging", ""));
         $("#phantom-cursor").hide();
         curPhantomX = undefined;
@@ -99,7 +99,7 @@ var Timeline = function ($, window, document) {
         var chart = d3.selectAll("svg.play-chart");
         var newY = getAltitude(destinationTime);
         var curPosition = chart.attr("width") * destinationTime / duration;
-        // var dur = isDragging ? 1000 : 250;
+        // var dur = Timeline.isDragging ? 1000 : 250;
         var dur = 0;
         // move the playhead.
         chart.selectAll(".playhead")
@@ -165,7 +165,7 @@ var Timeline = function ($, window, document) {
         // if (d3.event.dx < 10 && d3.event.dx > -10)
         //     return;
         /*
-        isDragging = true;
+        Timeline.isDragging = true;
         var chart = d3.selectAll("svg.play-chart");
         var playhead = d3.selectAll("svg.play-chart .playhead");
 
@@ -178,7 +178,7 @@ var Timeline = function ($, window, document) {
     }
 
     function handleDragging() {
-        isDragging = true;
+        Timeline.isDragging = true;
         if (!isChartMouseDown || !curMousePos)
             return;
         // console.log("dragging", curMousePos, curPhantomX);
@@ -256,7 +256,7 @@ var Timeline = function ($, window, document) {
             // y: d3.event.clientY
         };
 
-        if (isDragging && $(".chart .playbar.peak").length === 1) {
+        if (Timeline.isDragging && $(".chart .playbar.peak").length === 1) {
             // first time, so no delay yet
             if (typeof curPhantomX === "undefined") {
                 console.log("first time");
@@ -270,7 +270,7 @@ var Timeline = function ($, window, document) {
             document.querySelector("#phantom-cursor").setAttribute("x", curPhantomX + "px");
             document.querySelector("#phantom-cursor").setAttribute("y", curMousePos.y + "px");
 
-        } else if (isDragging) {
+        } else if (Timeline.isDragging) {
             // here take into account sudden jumps. apply catching up.
             // console.log("no peak", curPhantomX);
             // curPhantomX = timelineBox.left + curMousePos.x;
@@ -302,7 +302,7 @@ var Timeline = function ($, window, document) {
         // ignore micro dragging events
         // if (d3.event.dx < 10 && d3.event.dx > -10)
         //     return;
-        isDragging = true;
+        Timeline.isDragging = true;
 
         var chart = d3.selectAll("svg.play-chart");
         var playhead = d3.selectAll("svg.play-chart .playhead");
@@ -351,7 +351,7 @@ var Timeline = function ($, window, document) {
         // ignore micro dragging events
         // if (d3.event.dx < 10 && d3.event.dx > -10)
         //     return;
-        isDragging = true;
+        Timeline.isDragging = true;
         var chart = d3.selectAll("svg.play-chart");
         var playhead = d3.selectAll("svg.play-chart .playhead");
 
@@ -403,7 +403,7 @@ var Timeline = function ($, window, document) {
      //        .duration(0)
         //     .attr("cx", newX)
         //     .attr("cy", yScale(newY));
-        isDragging = false;
+        Timeline.isDragging = false;
     }
 */
 
@@ -478,7 +478,7 @@ var Timeline = function ($, window, document) {
             .on("mouseover", function(d, i){
                 var curPeak = Peak.getInteractionPeakAt(i);
                 var j;
-                if (isDragging)
+                if (Timeline.isDragging)
                     return;
                 tooltip.style("top", (event.pageY-150) + "px")
                     .style("left", (event.pageX-100) + "px")
@@ -694,6 +694,7 @@ var Timeline = function ($, window, document) {
 
     return {
         init: init,
+        isDragging: isDragging,
         getAltitude: getAltitude,
         movePlayhead: movePlayhead,
         drawPlayVis: drawPlayVis,

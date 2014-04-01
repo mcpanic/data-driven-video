@@ -216,6 +216,8 @@ var Highlight = function ($, window, document) {
     }
 
     function displayPip(img, uid) {
+        if (isControl)
+            return;
         var isPipSmall = $("#prev-frame").hasClass("pip-small");
         if (isPipSmall)
             $("#video").addClass("pip-small");
@@ -228,9 +230,31 @@ var Highlight = function ($, window, document) {
         $("#prev-frame")
             .data("uid", uid)
             .show();
-        Player.videoWidth = $("#video").width();
-        Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
-        Player.updateVideoOverlay();
+
+        // if (Timeline.isDragging) {
+            // $("#prev-frame").removeClass("hidden");
+            // $("#video").removeClass("hidden");
+
+            Player.videoWidth = $("#video").width();
+            Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
+            Player.updateVideoOverlay();
+        // } else {
+        //     $( "#prev-frame.hidden").animate({
+        //         opacity: 1,
+        //         "margin-left": "-=200px",
+        //       }, 2000, function() {
+        //         $("#prev-frame").removeClass("hidden");
+        //         $("#video").removeClass("hidden");
+        //         if (isPipSmall)
+        //             $("#video").addClass("pip-small");
+        //         else
+        //             $("#video").addClass("pip-big");
+        //         Player.videoWidth = $("#video").width();
+        //         Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
+        //         Player.updateVideoOverlay();
+        //     });
+        // }
+
     }
 
     // function screenshotDragendHandler(e){
@@ -265,6 +289,10 @@ var Highlight = function ($, window, document) {
         Player.videoWidth = Player.videoOrgWidth;
         Player.videoHeight = Player.videoOrgHeight;
         Player.updateVideoOverlay();
+        // if (!Timeline.isDragging) {
+            // $("#prev-frame").addClass("hidden");
+            // $("#video").addClass("hidden");
+        // }
     }
 
     function pipCancelClickHandler() {
