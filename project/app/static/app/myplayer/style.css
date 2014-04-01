@@ -2,6 +2,7 @@
 body {
     width: 1200px;
 }
+
 /*
 :not(input):focus, :not(input)textarea:focus {
     outline: none;
@@ -138,6 +139,7 @@ body {
     border: 1px solid #222;
     border-top: 0;
     background-color: #222; /*ddd;*/
+    cursor: pointer;
     box-sizing: border-box;
     /*width: 540px;*/
     /*height: 400px;*/
@@ -522,15 +524,44 @@ button:hover {
 	cursor: move;
 }
 
+.chart.dragging .playhead, .chart.dragging .playbar, .chart.dragging rect {
+    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjbQg61aAAAADUlEQVQYV2P4//8/IwAI/QL/+TZZdwAAAABJRU5ErkJggg=='),
+    none !important;
+}
+
 .chart .playbar.peak {
     fill: yellow;
     stroke: yellow;
     stroke-width: 1em;
 }
 
+.chart.dragging {
+    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjbQg61aAAAADUlEQVQYV2P4//8/IwAI/QL/+TZZdwAAAABJRU5ErkJggg=='),
+    none !important;
+    /*url(../img/cursor.png),*/
+}
+
+.chart .phantom-cursor {
+    display: none;
+}
+
+#phantom-cursor {
+    z-index: 3000;
+    position: fixed;
+    display: none;
+    background-image: url(../img/cursor.png);
+    top: 100px;
+    left: 100px;
+    width: 17.5px;
+    height: 25px;
+    background-size: 17.5px 25px;
+    background-repeat: no-repeat;
+}
+
 .playbar.dragging{
     stroke: teal;
 }
+
 .chart .dragtrail{
     stroke: teal;
     opacity: 0.7;
@@ -794,6 +825,13 @@ svg {
     /*overflow: scroll;*/
     border: 1px solid #ddd;
     padding: 1em;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make elements draggable in old WebKit */
+    -khtml-user-drag: element;
+    -webkit-user-drag: element;
 }
 
 #transcript:hover {

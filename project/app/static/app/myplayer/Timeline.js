@@ -14,6 +14,8 @@ var Timeline = function ($, window, document) {
     var draggingId = 0;
     var peakRecovery = 0;
     var curMousePos;
+    var timelineBox;
+    var curPhantomX;
 
     function init(visWidth, visHeight){
         w = visWidth;
@@ -75,10 +77,14 @@ var Timeline = function ($, window, document) {
             return;
         isChartMouseDown = false;
         isDragging = false;
+        $(".chart").attr("class", $(".chart").attr("class").replace(" dragging", ""));
+        $("#phantom-cursor").hide();
+        curPhantomX = undefined;
         Player.hideOverlay();
         var leftOffset = e.pageX - $("svg.chart").offset().left;
         //var second = Math.floor(d3.mouse(e)[0] * duration / visWidth);
         var second = Math.floor(leftOffset * duration / visWidth);
+        // console.log("mouseup second", second);
         Player.seekTo(second);
         // var chart = d3.selectAll("svg.play-chart");
         // chart.selectAll(".dragtrail")
@@ -140,7 +146,19 @@ var Timeline = function ($, window, document) {
         isChartMouseDown = true;
         // dragPlayheadMove(this);
         draggingId = setInterval(handleDragging, 10);
-        console.log("MOUSEDOWN", draggingId);
+        curMousePos = {
+            x: d3.mouse(this)[0], // e.clientX
+            y: d3.mouse(this)[1] // e.clientY
+        };
+
+        if ($(".chart").attr("class").indexOf("dragging") === -1)
+            $(".chart").attr("class", $(".chart").attr("class") + " dragging");
+
+        // show phantom cursor
+        // if (!$("#phantom-cursor").is(":visible"))
+            $("#phantom-cursor").show();
+
+        console.log("MOUSEDOWN", draggingId, curMousePos);
         // $(".playbar").attr("class", "playbar dragging");
         // console.log("mouse", d3.mouse(this));
         // ignore micro dragging events
@@ -163,23 +181,33 @@ var Timeline = function ($, window, document) {
         isDragging = true;
         if (!isChartMouseDown || !curMousePos)
             return;
-        // $(".playbar").attr("class", "playbar dragging");
-
+        // console.log("dragging", curMousePos, curPhantomX);
         var chart = d3.selectAll("svg.play-chart");
-        var newX = curMousePos.x;
+        // var newX = curMousePos.x;
+        var newX = typeof curPhantomX === "undefined" ? curMousePos.x : curPhantomX;
         var newTime = parseInt(newX * duration / chart.attr("width"));
         // var curTime = Player.getCurrentTime();
         var curTime = Player.getPhantomTime();
+        // save all the computation if there's no time to update
+        if (newTime === curTime)
+            return;
         Player.showOverlay();
+        Player.videoTimeUpdateManual(newTime);
+
+        // $(".chart .playhead").attr("class", "playhead dragging");
+        // $(".chart .playbar").attr("class", "playbar dragging");
         // var playhead = d3.selectAll("svg.play-chart .playhead");
         // var newX = d3.mouse(this)[0]; //parseFloat(playhead.attr("cx")) + d3.event.dx;
         // var newY = getAltitude(newTime);
 
+
         // console.log("curTime", curTime, "newTime", newTime, "diff", newTime - curTime);
+        /*
         if (Peak.isInteractionPeak(curTime)) {
             // var penalty = 0.1;
             // var adjustedTime = curTime + penalty * (newTime - curTime);
-            var unit = newTime - curTime > 0 ? Math.min(0.1, newTime - curTime) : Math.max(-0.1, newTime - curTime);
+            //var unit = newTime - curTime > 0 ? Math.min(0.1, newTime - curTime) : Math.max(-0.1, newTime - curTime);
+            var unit = newTime - curTime;
             var adjustedTime = curTime + unit; // static slowdown
             // console.log(adjustedTime);
             // console.log("adjTime", adjustedTime);
@@ -187,32 +215,86 @@ var Timeline = function ($, window, document) {
             Player.videoTimeUpdateManual(adjustedTime);
             peakRecovery = 20;
         } else {
-            if (peakRecovery > 0) {
-                peakRecovery -= 1;
-                var penalty = 0.05;
-                var adjustedTime = curTime + penalty * (newTime - curTime);
-                // console.log("adjTime", adjustedTime);
-                // Player.seekTo(adjustedTime);
-                Player.videoTimeUpdateManual(adjustedTime);
-            } else {
-                // Player.seekTo(newTime);
-                Player.videoTimeUpdateManual(newTime);
-            }
+            Player.videoTimeUpdateManual(newTime);
+            // phantom cursor
+            // if (peakRecovery > 0) {
+            //     peakRecovery -= 1;
+            //     var penalty = 0.05;
+            //     var adjustedTime = curTime + penalty * (newTime - curTime);
+            //     // console.log("adjTime", adjustedTime);
+            //     // Player.seekTo(adjustedTime);
+            //     Player.videoTimeUpdateManual(adjustedTime);
+            // } else {
+            //     // Player.seekTo(newTime);
+            //     Player.videoTimeUpdateManual(newTime);
+            // }
         }
+        */
     }
 
-
+    // var oldTimeTime = Date.now();
     // simply updates the mouse position because mouse position information
     // is only available via event handlers.
     function chartMousemoveHandler(e){
+        // var nownow = Date.now();
+        // console.log(nownow - oldTimeTime);
+        // oldTimeTime = nownow;
+
         // console.log(isChartMouseDown, d3.mouse(this)[0]);
         if (!isChartMouseDown)
             return;
         // e = e || window.event; // IE-ism
+        if (typeof curMousePos !== "undefined") {
+            var oldx = curMousePos.x;
+            var oldy = curMousePos.y;
+        }
+        // console.log(d3.mouse(this)[0], d3.mouse(this)[1], d3.event.clientX, d3.event.clientY);
         curMousePos = {
             x: d3.mouse(this)[0], // e.clientX
             y: d3.mouse(this)[1] // e.clientY
+            // x: d3.event.clientX,
+            // y: d3.event.clientY
         };
+
+        if (isDragging && $(".chart .playbar.peak").length === 1) {
+            // first time, so no delay yet
+            if (typeof curPhantomX === "undefined") {
+                console.log("first time");
+                curPhantomX = oldx + (curMousePos.x - oldx) * 0.3;
+            } else {
+                curPhantomX += (curMousePos.x - oldx) * 0.5;
+            }
+            // console.log("phantom", curMousePos.x, curPhantomX, timelineBox.top, curMousePos.y);
+            // document.querySelector("#phantom-cursor").style.left = curPhantomX + "px";
+            // document.querySelector("#phantom-cursor").style.top = curMousePos.y + "px";
+            document.querySelector("#phantom-cursor").setAttribute("x", curPhantomX + "px");
+            document.querySelector("#phantom-cursor").setAttribute("y", curMousePos.y + "px");
+
+        } else if (isDragging) {
+            // here take into account sudden jumps. apply catching up.
+            // console.log("no peak", curPhantomX);
+            // curPhantomX = timelineBox.left + curMousePos.x;
+            if (typeof curPhantomX === "undefined") {
+                curPhantomX = curMousePos.x;
+            } else {
+                // snap if < 50px nearby
+                // console.log(curMousePos.x - curPhantomX);
+                if (curMousePos.x - curPhantomX > 20 || curMousePos.x - curPhantomX < -20)
+                    curPhantomX += (curMousePos.x - curPhantomX) / 5; // catch up 1/5 distance every run
+                else
+                    curPhantomX = curMousePos.x;
+            }
+            // document.querySelector("#phantom-cursor").style.left = curPhantomX + "px";
+            // document.querySelector("#phantom-cursor").style.top = curMousePos.y + "px";
+            document.querySelector("#phantom-cursor").setAttribute("x", curPhantomX + "px");
+            document.querySelector("#phantom-cursor").setAttribute("y", curMousePos.y + "px");
+        } else {
+            console.log("dragging ended", curPhantomX);
+            // document.querySelector("#phantom-cursor").style.left = curMousePos.x + "px";
+            // document.querySelector("#phantom-cursor").style.top = curMousePos.y + "px";
+            document.querySelector("#phantom-cursor").setAttribute("x", curMousePos.x + "px");
+            document.querySelector("#phantom-cursor").setAttribute("y", curMousePos.y + "px");
+        }
         return;
         /*
 
@@ -372,29 +454,6 @@ var Timeline = function ($, window, document) {
         //     .style("visibility", "hidden")
         //     .text("Tooltip");
 
-        var line = d3.svg.line()
-            .x(function(d, i){ return xScale(i); })
-            .y(function(d){ return yScale(d); });
-
-        // chart.selectAll("path")
-        //     .data(dataset)
-        //     .enter().append("path")
-        //     .attr("d", line(dataset));
-
-        // chart.append("svg:path")
-        //     .data(dataset)
-        //     .attr("d", line(dataset))
-        //     .on("click", rectMousedownHandler);
-            // .on("mouseover", function(d, i){
-            //     console.log(this, d, i);
-            //     return tooltip.text("at " + formatSeconds(d.key) + " count: " + d.value).style("visibility", "visible");
-            // })
-            // .on("mousemove", function(d){
-            //     return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
-            // })
-            // .on("mouseout", function(d){
-            //     return tooltip.style("visibility", "hidden");
-            // });
         chart.on("mousedown", rectMousedownHandler);
         chart.on("mousemove", chartMousemoveHandler);
 
@@ -433,9 +492,6 @@ var Timeline = function ($, window, document) {
                 }
                 return;
             })
-            // .on("mousemove", function(d){
-            //     return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
-            // })
             .on("mouseout", function(d, i) {
                 var curPeak = Peak.getInteractionPeakAt(i);
                 var j;
@@ -444,7 +500,36 @@ var Timeline = function ($, window, document) {
                 }
                 return tooltip.style("display", "none");
             });
+            // .on("mousemove", function(d){
+            //     return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+            // })
 
+/* Path implementation
+        var line = d3.svg.line()
+            .x(function(d, i){ return i * (w / dataset.length); })
+            .y(function(d){ return yScale(d); })
+            .interpolate("basis");
+
+        chart.append("path")
+            .attr("stroke", "#888")
+            .attr("stroke-width", 2)
+            .attr("d", line(dataset));
+
+        // chart.append("svg:path")
+        //     .data(dataset)
+        //     .attr("d", line(dataset))
+        //     .on("click", rectMousedownHandler);
+        //     .on("mouseover", function(d, i){
+        //         console.log(this, d, i);
+        //         return tooltip.text("at " + formatSeconds(d.key) + " count: " + d.value).style("visibility", "visible");
+        //     })
+        //     .on("mousemove", function(d){
+        //         return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+        //     })
+        //     .on("mouseout", function(d){
+        //         return tooltip.style("visibility", "hidden");
+        //     });
+*/
         // Add playbar
         chart.append("line")
             .attr("class", "playbar")
@@ -463,6 +548,15 @@ var Timeline = function ($, window, document) {
             .on("mousedown", playheadMousedownHandler);
             // .on("mousemove", playheadMousemoveHandler);
             // .call(dragPlayhead);
+
+        // phantom cursor
+        chart.append("image")
+            .attr("xlink:href", "/static/app/img/cursor.png")
+            .attr("id", "phantom-cursor")
+            .attr("x", "20px")
+            .attr("y", "20px")
+            .attr("width", "17.5px")
+            .attr("height", "25px");
 
         // chart.selectAll("text")
         //     .data(dataset)
@@ -490,6 +584,9 @@ var Timeline = function ($, window, document) {
             .attr("class", "axis y-axis")
             //.attr("transform", "translate(" + padding + ",0)")
             .call(yAxis);
+
+        // update the timeline position box
+        timelineBox = document.querySelector("#timeline").getBoundingClientRect();
         return chart;
     }
 
