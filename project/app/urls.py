@@ -7,6 +7,8 @@ urlpatterns = patterns('',
     # url(r'^$', 'project.views.home', name='home'),
     # url(r'^project/', include('project.foo.urls')),
 
+    url(r'^study/(?P<pid>\d+)$', logs.study, name='study'),
+
 	url(r'^player/(?P<course>.+)/(?P<vid>\w+)/$', views.player, name='player'),
     url(r'^multiplayer/(?P<course>.+)/$', views.multiplayer, name='multiplayer'),
 	url(r'^prototype/(?P<vid>\w+)/$', views.prototype_interface, name='prototype_interface'),

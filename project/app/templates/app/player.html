@@ -217,11 +217,11 @@
     var i;
 
     // Detect control condition
-    var isControl = gup("control") == "1" ? true : false;
+    var isControl = gup("iid") == "con" ? true : false;
     console.log(isControl);
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
-            "http://juhokim.com:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
+            "http://localhost:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
     }
 
     // remove first 3% of data to prevent from overwhelming the graph

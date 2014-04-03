@@ -16,3 +16,8 @@ def add_log(request):
     log.save()
     results = {'success': True}
     return HttpResponse(simplejson.dumps(results), mimetype='application/json')
+
+def study(request, pid):
+    return render(request, "app/study.html", {
+        'pid': pid
+    })
