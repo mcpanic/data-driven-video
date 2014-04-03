@@ -22,7 +22,6 @@ var Peak = function ($, window, document) {
         Peak.visualPeaks = vPeaks;
         Peak.bookmarkPeaks = bPeaks;
         initUID();
-        // console.log(interactionPeaks);
     }
 
     function initUID() {
@@ -183,8 +182,6 @@ var Peak = function ($, window, document) {
     function addBookmarkPeak(obj) {
         Peak.bookmarkPeaks.push(obj);
         Peak.bookmarkPeaks.sort(sortPeaksByTime);
-        console.log(Peak.bookmarkPeaks);
-        console.log(Peak.interactionPeaks);
     }
 
 

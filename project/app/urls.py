@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 
-from app import views, wordcloud
+from app import views, wordcloud, logs
 
 urlpatterns = patterns('',
     # Examples:
@@ -22,4 +22,6 @@ urlpatterns = patterns('',
 
 	url(r'^process-data-ajax/(?P<index>\d+)$', views.process_data_ajax, name='process_data_ajax'),
 	url(r'^process-heatmaps-ajax/(?P<index>\d+)$', views.process_heatmaps_ajax, name='process_heatmaps_ajax'),
+
+    url(r'^log-ajax/$', logs.add_log, name='add_log'),
 )

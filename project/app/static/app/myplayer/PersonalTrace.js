@@ -26,6 +26,7 @@ var PersonalTrace = function ($, window, document) {
 
     function traceClickHandler() {
         Player.seekTo($(this).data("start"));
+        Log.add("PersonalTrace", "traceClick", {"sid": $(this).data("sid")});
     }
 
     function traceMouseoverHandler(event) {
@@ -91,7 +92,12 @@ var PersonalTrace = function ($, window, document) {
             .css("left", xPos + "%")
             .css("width", width + "%")
             .appendTo("#timeline");
-
+        Log.add("PersonalTrace", "traceAdded", {
+            "sid": tid,
+            "start": start,
+            "end": end,
+            "label": "You watched this segment."
+        });
         // $("<span/>")
         //     .addClass("tooltip")
         //     .text("You watched this segment.")

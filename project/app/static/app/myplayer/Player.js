@@ -63,7 +63,8 @@ var Player = function ($, window, document) {
     function load(videoUrl) {
         video.src = videoUrl;
         video.load();
-        play();
+        // play();
+        // pause();
     }
 
     function seekTo(time) {
@@ -167,8 +168,10 @@ var Player = function ($, window, document) {
     function playButtonClickHandler(){
         if (video.paused == true) {
             play();
+            Log.add("Player", "playButtonClick", {"state": "pause to play", "curTime": getCurrentTime()});
         } else {
             pause();
+            Log.add("Player", "playButtonClick", {"state": "play to pause", "curTime": getCurrentTime()});
         }
     }
 
@@ -197,6 +200,7 @@ var Player = function ($, window, document) {
                 volumeLevel = "volume-high-display";
             $(muteButton).removeClass("volume-mute-display").addClass(volumeLevel);
         }
+        Log.add("Player", "muteButtonClick", {"curTime": getCurrentTime()});
     }
 
 
@@ -209,17 +213,20 @@ var Player = function ($, window, document) {
         } else if (video.webkitRequestFullscreen) {
             video.webkitRequestFullscreen(); // Chrome and Safari
         }
+        Log.add("Player", "fullScreenClick", {"curTime": getCurrentTime()});
     }
 
 
     // Pause the video when the seek handle is being dragged
     function seekBarMousedownHandler(){
         pause();
+        Log.add("Player", "seekBarMousedown", {"curTime": getCurrentTime()});
     }
 
     // Play the video when the seek handle is dropped
     function seekBarMouseupHandler(){
         play();
+        Log.add("Player", "seekBarMouseup", {"curTime": getCurrentTime()});
     }
 
     // Event listener for the seek bar
@@ -249,6 +256,7 @@ var Player = function ($, window, document) {
     }
 
     function videoClickHandler(){
+        Log.add("Player", "videoClick", {"curTime": getCurrentTime()});
         playButton.click();
     }
 
@@ -508,6 +516,7 @@ var Player = function ($, window, document) {
     function videoEndedHandler() {
         pause(true);
         console.log("video ended");
+        Log.add("Player", "videoEnded", {});
     }
 
 
@@ -532,7 +541,7 @@ var Player = function ($, window, document) {
         } else {
             $("#speed-dropdown").show();
         }
-        console.log("clicked");
+        Log.add("Player", "speedButtonClick", {});
     }
 
     function speedOptionClickHandler(){
@@ -541,6 +550,7 @@ var Player = function ($, window, document) {
         console.log(newSpeed);
         updateSpeed(newSpeed);
         $("#speed-dropdown").hide();
+        Log.add("Player", "speedOptionClick", {"newSpeed": newSpeed});
     }
 
     function updateSpeed(newSpeed){

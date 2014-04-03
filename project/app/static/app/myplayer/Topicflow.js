@@ -46,6 +46,7 @@ var Topicflow = function ($, window, document) {
     function topicClickHandler() {
         var clickedTopic = $(this).text();
         $("input.search-bar").val(clickedTopic).trigger("keyup");
+        Log.add("Topicflow", "topicClick", {"topic": clickedTopic});
     }
 
     function loadTopics() {

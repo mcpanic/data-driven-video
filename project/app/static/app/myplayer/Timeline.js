@@ -50,7 +50,7 @@ var Timeline = function ($, window, document) {
         var force = dx*dx;
         var speed = Math.min(16, force / 10000);
         speed = Math.max(0.5, speed);
-        console.log("force", force, "speed", speed);
+        // console.log("force", force, "speed", speed);
 
         // 3) play a "quick" preview based on the speed from 2)
         if (dx < 0)
@@ -68,6 +68,7 @@ var Timeline = function ($, window, document) {
         //     .attr("stroke-width", (speed * 2) + "px");
         // dragTrail.enter().append("line")
         //     .attr("class", "dragtrail");
+        Log.add("Timeline", "rectMousedown", {"newTime": newTime});
     }
 
     function mouseupHandler(e) {
@@ -92,6 +93,7 @@ var Timeline = function ($, window, document) {
         //     .duration(500)
         //     .attr("opacity", 0)
         //     .remove();
+        Log.add("Timeline", "mouseup", {"newTime": second});
     }
 
     /* Progress the playhead as the video advances to the destinationTime mark. */
@@ -159,6 +161,7 @@ var Timeline = function ($, window, document) {
             $("#phantom-cursor").show();
 
         console.log("MOUSEDOWN", draggingId, curMousePos);
+        Log.add("Timeline", "playheadMousedown", {"curTime": Player.getCurrentTime()});
         // $(".playbar").attr("class", "playbar dragging");
         // console.log("mouse", d3.mouse(this));
         // ignore micro dragging events

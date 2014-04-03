@@ -103,6 +103,7 @@ var Highlight = function ($, window, document) {
             }
         }
         refreshScrollbar();
+        Log.add("Highlight", "checkboxClick", {"checkboxValue": checkboxValue, "isChecked": isChecked});
     }
 
     function addScrollbar() {
@@ -130,9 +131,10 @@ var Highlight = function ($, window, document) {
             return;
         var iPeak = Peak.getInteractionPeakAt(time);
         if (typeof iPeak !== "undefined") {
-            console.log("iPeak and vPeak detected", iPeak, vPeak, time);
+            console.log("iPeak and vPeak detected", time);
             if (iPeak["top"] <= vPeak["top"]) {
                 console.log("iPeak <= vTran, update PIP");
+                Log.add("Highlight", "updatePip", {"message": "auto update", "time": time});
                 $("#peak_" + iPeak["uid"]).find(".screenshot-pin").trigger("click");
             } else {
                 console.log("vTran < iPeak, do not update PIP");
@@ -187,6 +189,7 @@ var Highlight = function ($, window, document) {
         if (typeof Highlight.api !== "undefined") {
             Highlight.api.scrollToElement($(this));
         }
+        Log.add("Highlight", "screenshotClick", {"uid": $(this).data("uid")});
     }
 
     function screenshotMouseenterHandler(){
@@ -277,6 +280,8 @@ var Highlight = function ($, window, document) {
             displayPip($screenshot.find("img")[0], $screenshot.data("uid"));
         e.preventDefault();
         e.stopPropagation();
+        if (!Timeline.isDragging)
+            Log.add("Highlight", "screenshotPinClick", {"uid": $screenshot.data("uid")});
     }
 
     function hidePip() {
@@ -297,6 +302,7 @@ var Highlight = function ($, window, document) {
 
     function pipCancelClickHandler() {
         hidePip();
+        Log.add("Highlight", "pipCancelClick", {"uid": $("#prev-frame").data("uid")});
     }
 
     function pipSmallerClickHandler() {
@@ -305,6 +311,7 @@ var Highlight = function ($, window, document) {
         Player.videoWidth = $("#video").width();
         Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
         Player.updateVideoOverlay();
+        Log.add("Highlight", "pipSmallerClick", {"uid": $("#prev-frame").data("uid")});
     }
 
     function pipBiggerClickHandler() {
@@ -313,6 +320,7 @@ var Highlight = function ($, window, document) {
         Player.videoWidth = $("#video").width();
         Player.videoHeight = $("#video").width() * Player.videoOrgHeight / Player.videoOrgWidth;
         Player.updateVideoOverlay();
+        Log.add("Highlight", "pipBiggerClick", {"uid": $("#prev-frame").data("uid")});
     }
 
     function pipMouseenterHandler() {
@@ -361,6 +369,7 @@ var Highlight = function ($, window, document) {
 
     function timelinePeakClickHandler(){
         Player.seekTo($(this).data("start"));
+        Log.add("Highlight", "timelinePeakClick", {"uid": $(this).data("uid")});
     }
 
     function getThumbnailUrl(curTime) {
@@ -386,6 +395,7 @@ var Highlight = function ($, window, document) {
             $("#save-bookmark-button").show();
             $("#cancel-bookmark-button").show();
             $("#bookmark-time").text(formatSeconds(curTime)).show();
+            Log.add("Highlight", "addBookmarkButtonClick", {"curTime": curTime});
         }
     }
 
@@ -393,8 +403,9 @@ var Highlight = function ($, window, document) {
         var curTime = $("#add-bookmark-button").data("curTime");
         var description = $("#bookmark-description").val();
         //peaks.push([curTime-2, curTime, curTime+2, 100, "You bookmarked it.", description]);
+        var uid = Peak.getNewBookmarkUID();
         Peak.addBookmarkPeak({
-                    "uid": Peak.getNewBookmarkUID(),
+                    "uid": uid,
                     "start": curTime - 2,
                     "top": curTime,
                     "end": curTime + 2,
@@ -403,10 +414,19 @@ var Highlight = function ($, window, document) {
                     "label": description});
         displayPeaks();
         hideBookmarkPanel();
+        Log.add("Highlight", "saveBookmarkButtonClick", {
+                    "uid": uid,
+                    "start": curTime - 2,
+                    "top": curTime,
+                    "end": curTime + 2,
+                    "type": "bookmark",
+                    "score": 100,
+                    "label": description});
     }
 
     function cancelBookmarkButtonClickHandler(){
         hideBookmarkPanel();
+        Log.add("Highlight", "cancelBookmarkButtonClick", {});
     }
 
     function updatePeaks(peaks, position){

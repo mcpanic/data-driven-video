@@ -246,6 +246,7 @@ var Transcript = function ($, window, document) {
         Highlight.displayPeaks(peaks);
         $(".search-cancel").addClass("hide");
         Peak.searchPeaks = [];
+        Log.add("Transcript", "searchCancelClick", {});
     }
 
     // add Gaussian and convolution to the timeline
@@ -474,12 +475,13 @@ var Transcript = function ($, window, document) {
         }
 
         $(".search-summary").text(count + " results found on ");
-
+        Log.add("Transcript", "searchKeyup", {"term": term, "count": count});
     }
 
 
     function transcriptClickHandler() {
         var second = $(this).closest(".transcript-entry").attr("data-second");
+        Log.add("Transcript", "transcriptClick", {"time": second});
         Player.seekTo(second);
     }
 
