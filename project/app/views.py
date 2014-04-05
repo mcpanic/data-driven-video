@@ -193,7 +193,7 @@ def video_single_query(vid):
         masked_play_kde = np.ma.array(play_kde, mask=np.isnan(play_kde))
         #print masked_play_kde, "max", np.max(masked_play_kde[:,1])
         play_kde = masked_play_kde
-        play_peaks_raw = detect_peaks(play_kde[:,1], 2.0, "interaction")
+        play_peaks_raw = detect_peaks(play_kde[:,1], 2.2, "interaction")
         entries[0]["play_kde"] = play_kde[:,1].tolist()
         interaction_peaks = json.dumps(play_peaks_raw, default=json_util.default)
         result = json.dumps(entries[0], default=json_util.default)

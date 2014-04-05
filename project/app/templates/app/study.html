@@ -70,11 +70,11 @@
                 "&torder=" + task.torder +
                 "&ttype=" + task.ttype;
             if (i == 1) {
-                $("<h3/>").html("Part 1. Visual Search Tasks").appendTo($("#tasks"));
+                $("<h3/>").html("Part 1.").appendTo($("#tasks"));
             } else if (i == 5) {
-                $("<h3/>").html("Part 2. Problem Search Tasks").appendTo($("#tasks"));
+                $("<h3/>").html("Part 2.").appendTo($("#tasks"));
             } else if (i == 7) {
-                $("<h3/>").html("Part 3. Skimming Tasks").appendTo($("#tasks"));
+                $("<h3/>").html("Part 3.").appendTo($("#tasks"));
             }
             $("<div/>")
                 .html("<span class='progress'>&nbsp;&nbsp;&nbsp;</span><a target='_blank' href='" + url + "'>Task " + task.torder + "</a>" +

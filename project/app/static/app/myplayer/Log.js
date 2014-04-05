@@ -25,6 +25,9 @@ var Log = function ($, window, document) {
         // }
     };
 
+    var part1QuestionnaireUrl = "https://docs.google.com/forms/d/1uWVFJBh6N35B9xAHir6dx876VmZKtit-wXmz16JZOgA/viewform";
+    var part2QuestionnaireUrl = "https://docs.google.com/forms/d/169_1Fr2k1-I43xst9bSr0t6yO7NU0-ZqouixhslJzPA/viewform";
+    var part3QuestionnaireUrl = "https://docs.google.com/forms/d/14i1J6WG85WTBhvV5gMD6gd5L_NqVnXn2H3lhe3sebss/viewform";
     var postQuestionnaireUrl = "";
     var tutorialConUrl = "";
     var tutorialExpUrl = "";

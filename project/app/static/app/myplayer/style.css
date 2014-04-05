@@ -451,6 +451,7 @@ button:hover {
     cursor: pointer;
     border: 1px solid black;
     padding: 0.1em 0.5em;
+    display: none;
 }
 
 #speed-button:hover{
@@ -462,7 +463,7 @@ button:hover {
 #speed-dropdown{
     display: none;
     position: absolute;
-    left: 266px;
+    left: 259px;
     margin-top: -155px;
     background-color: #ddd;
 }
