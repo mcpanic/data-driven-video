@@ -11,6 +11,20 @@ function bindEvents() {
         $("#timeline").css("width", "100px");
     });
 
+    $(document).on("click", ".done-button", function() {
+        console.log("DONE with the task");
+        Player.pause();
+        $("<div/>")
+            .addClass("done-tooltip tooltip")
+            .text("Thank you. Please close this window now.")
+            .css("top", (event.pageY-10) + "px")
+            .css("left", (event.pageX+20) + "px")
+            .appendTo("body")
+            .show();
+        Log.add("script.js", "doneButtonClick", {"curTime": Player.getCurrentTime()});
+    });
+
+
     // $("#tabs .tab-item").click(function () {
     //     if ($(this).hasClass("active")) {
     //         return;

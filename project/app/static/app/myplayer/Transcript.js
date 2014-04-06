@@ -252,7 +252,7 @@ var Transcript = function ($, window, document) {
     // add Gaussian and convolution to the timeline
     function formatSearchData(timemarks, term) {
         var searchData = [];
-        console.log(timemarks);
+        // console.log(timemarks);
         var i;
         for(i = 0; i < duration; i++) {
             searchData[i] = 100;
@@ -295,11 +295,11 @@ var Transcript = function ($, window, document) {
                 interactionScoreArray.push(data.play_counts[j]);
             }
             var interactionScore = Math.max.apply( Math, interactionScoreArray ) * 1.5;
-            console.log(foundStartTimeInt, foundEndTimeInt, interactionScoreArray.length, interactionScore);
+            // console.log(foundStartTimeInt, foundEndTimeInt, interactionScoreArray.length, interactionScore);
 
             // construct a full sentence
             var sentence = "";
-            console.log(foundStartTime, foundEndTime, subtitles[foundStartTime]);
+            // console.log(foundStartTime, foundEndTime, subtitles[foundStartTime]);
             for (var j = foundStartIndex; j <= foundEndIndex; j++) {
                 var time = orderedTimeIndices[j];
                 if (j !== foundStartIndex)
@@ -322,7 +322,7 @@ var Transcript = function ($, window, document) {
                 }
             }
             sentence = words.join(' ');
-            console.log(sentence);
+            // console.log(sentence);
 
             // uphill
             var unit = 0;
@@ -429,13 +429,13 @@ var Transcript = function ($, window, document) {
         // var oh = $("#transcript").height();
         // var oh = document.querySelector('#transcript').offsetHeight;
         // entire div height
-        var sh = document.querySelector('#transcript .jspContainer').scrollHeight;
+        var sh = document.querySelector('#transcript .jspContainer .jspPane').scrollHeight;
         // var scrollRatio =  oh / sh;
         // scroll bar height
         // var bh = scrollRatio * oh;
         // console.log("sh", sh, "oh", oh, "bh", bh);
         // var actualScrollHeight = oh - bh;
-        // var transcriptTop = $(".jspContainer").position().top;
+        var transcriptTop = $(".jspContainer").position().top;
         $(".search-found").each(function () {
             // console.log(this.offsetTop, (this.offsetTop - transcriptTop));
             $("<span class='search-tick'></span>")

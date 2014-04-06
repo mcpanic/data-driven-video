@@ -105,8 +105,8 @@
             }
             $("<div/>")
                 .html("<span class='progress'>&nbsp;&nbsp;&nbsp;</span>" +
-                    "<a target='_blank' href='" + url + "'>Task " + task.torder + "</a>" +
-                    " " + task.iid + " " + task.pid + " " + task.tid + " " + task.torder + " " + task.ttype + " " + task.vcode + " " + task.vid)
+                    "<a target='_blank' href='" + url + "'>Task " + task.torder + "</a>&nbsp;&nbsp;&nbsp;(" + task.vcode + ")")
+                    //" " + task.iid + " " + task.pid + " " + task.tid + " " + task.torder + " " + task.ttype + " " + task.vcode + " " + task.vid)
                 .appendTo($("#tasks"));
             $("<div/>")
                 .html("<span class='progress'>&nbsp;&nbsp;&nbsp;</span>" +

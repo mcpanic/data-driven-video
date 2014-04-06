@@ -18,6 +18,25 @@ body {
     user-select: none;
 }
 
+.done-button {
+    padding: 3px 15px;
+    background-color: #d14836;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: -3px;
+    margin-left: 20px;
+}
+
+.done-tooltip {
+    font-size: 24px !important;
+    width: 300px !important;
+}
+
+.done-button:hover {
+    opacity: 0.8;
+}
+
 *:focus {
     outline: none;
 }

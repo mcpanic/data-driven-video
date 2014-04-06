@@ -25,6 +25,7 @@
             <div class="list"><a href="#">Dashboard</a></div>
             <div class="next"><a href="#">Next &gt; </a></div>
         </div> -->
+        <button class="done-button">DONE</button>
         <span class="search-button"></span>
         <span class="search-cancel hide"></span>
         <input type="text" class="search-bar" size="100" placeholder="search for keywords inside the video">
@@ -225,10 +226,10 @@
     params["ttype"] = gup("ttype");
     params["vcode"] = gup("vcode");
     console.log(params);
-    for (i in videos) {
-        console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
-            "http://localhost:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
-    }
+    // for (i in videos) {
+    //     console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
+    //         "http://localhost:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));
+    // }
 
     // remove first 3% of data to prevent from overwhelming the graph
     var anchorVal = parseInt(data["duration"] * 0.03);
