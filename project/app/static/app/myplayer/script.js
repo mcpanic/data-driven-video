@@ -167,12 +167,21 @@ function init(){
     // $("#speed-table th").first().trigger("click");
     //displayPeaks(peaks);
 
-    if (isControl) {
+    if (params["iid"] == "con") {
         $("#seek-bar").show();
         $("#video-top").hide();
         $("#add-bookmark-button").hide();
         $("#timeline").hide();
         $("#bottompane").hide();
+    }
+
+    if (params["ttype"] == "vs") {
+        $("#add-bookmark-button").hide();
+        $("#rightpane").hide();
+        $("#bottompane").hide();
+        $(".search-bar").hide();
+        $(".search-button").hide();
+        $(".search-summary").hide();
     }
 }
 

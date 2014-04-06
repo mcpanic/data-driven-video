@@ -9,10 +9,11 @@ urlpatterns = patterns('',
 
     url(r'^study/(?P<pid>\d+)$', logs.study, name='study'),
 
-	url(r'^player/(?P<course>.+)/(?P<vid>\w+)/$', views.player, name='player'),
+	# url(r'^player/(?P<course>.+)/(?P<vid>\w+)/$', views.player, name='player'),
+    url(r'^player/(?P<course>.+)/(?P<vid>[a-zA-Z0-9-_]+)/$', views.player, name='player'),
     url(r'^multiplayer/(?P<course>.+)/$', views.multiplayer, name='multiplayer'),
-	url(r'^prototype/(?P<vid>\w+)/$', views.prototype_interface, name='prototype_interface'),
-	url(r'^video-single/(?P<vid>\w+)/$', views.video_single, name='video_single'),
+	url(r'^prototype/(?P<vid>[a-zA-Z0-9-_]+)/$', views.prototype_interface, name='prototype_interface'),
+	url(r'^video-single/(?P<vid>[a-zA-Z0-9-_]+)/$', views.video_single, name='video_single'),
 	url(r'^video-list/$', views.video_list, name='video_list'),
 	url(r'^process-data/$', views.process_data, name='process_data'),
 

@@ -31,7 +31,8 @@ var Player = function ($, window, document) {
     function init(videoUrl) {
         bindEvents();
         load(videoUrl);
-        muteButton.click();
+        // mute by default
+        // muteButton.click();
     }
 
     var loadedImages = 0;
@@ -63,6 +64,7 @@ var Player = function ($, window, document) {
     function load(videoUrl) {
         video.src = videoUrl;
         video.load();
+        // Autoplay
         // play();
         // pause();
     }

@@ -217,8 +217,14 @@
     var i;
 
     // Detect control condition
-    var isControl = gup("iid") == "con" ? true : false;
-    console.log(isControl);
+    var params = {};
+    params["iid"] = gup("iid");
+    params["pid"] = gup("pid");
+    params["tid"] = gup("tid");
+    params["torder"] = gup("torder");
+    params["ttype"] = gup("ttype");
+    params["vcode"] = gup("vcode");
+    console.log(params);
     for (i in videos) {
         console.log(videos[i].week_number, videos[i].sequence_number, videos[i].module_index,
             "http://localhost:5555/app/player/" + course + "/" + videos[i].video_id, videos[i].video_name.substr(videos[i].video_name.lastIndexOf("-")+1));

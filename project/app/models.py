@@ -18,6 +18,12 @@ class Log(models.Model):
     # Details about the action (parameters, numbers, position, etc.)
     message = models.CharField(max_length=256)
 
+    # URL parameters
+    params = models.CharField(max_length=256)
+
+    # video ID
+    video = models.CharField(max_length=32)
+
     is_admin = models.BooleanField(default=False)
     added_at = models.DateTimeField(auto_now_add=True)
 

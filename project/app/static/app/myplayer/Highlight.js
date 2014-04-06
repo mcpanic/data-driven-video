@@ -219,7 +219,7 @@ var Highlight = function ($, window, document) {
     }
 
     function displayPip(img, uid) {
-        if (isControl)
+        if (params["iid"] == "con")
             return;
         var isPipSmall = $("#prev-frame").hasClass("pip-small");
         if (isPipSmall)
