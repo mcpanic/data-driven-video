@@ -199,7 +199,7 @@
     var visHeight = 70; // 80
     var video_id = "{{ video_id }}";
     var course = "{{ course }}";
-    var mediaUrlPrefix = "http://localhost:8888/edx/edxanalytics/src/edxanalytics/edxmodules/video_analytics/static/";
+    var mediaUrlPrefix = "{% static 'app/' %}";
     // var mediaUrlPrefix = "http://juhokim.com/edxanalytics/";
     var videoUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".mp4";
     var transcriptUrl = mediaUrlPrefix + "videos/" + course + "/v_" + video_id + ".en.srt";

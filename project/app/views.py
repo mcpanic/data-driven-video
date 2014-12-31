@@ -16,6 +16,7 @@ from django.shortcuts import render
 from common import get_prop, CONF
 from video_logic import process_segments, process_heatmaps
 from algorithms import get_kde, detect_peaks
+from django.template.loader import render_to_string
 
 # name of the event collection
 # COURSE_NAME = 'PH207x-Fall-2012'
@@ -60,7 +61,9 @@ VIDEOS_COL = 'videos'
 def get_db():
     client = MongoClient()
     # mongodb = client['edxmodules_video_analytics_video_analytics']
-    mongodb = client['video']
+    mongodb = client['edxmodules_video_analytics_video_analytics']
+    print "connected"
+    print mongodb
     return mongodb
 
 
@@ -90,10 +93,23 @@ def player(request, course, vid):
     mongodb = get_db()
     [data, peaks, vtran_data, vtran_peaks] = video_single_query(vid)
     videos = video_info_query(course)
+    #print "videos"
+    #print videos
+    #print [data, peaks, vtran_data, vtran_peaks]
     # from edinsights.core.render import render
-    return render(request, "app/player.html", {
+
+    # return render(request, "app/player.html", {
+    #     'course': course , 'video_id': vid, 'data': data, 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks, 'videos': videos, 'peaks': peaks
+    # })
+
+    rendering = render_to_string("app/player.html", {
         'course': course , 'video_id': vid, 'data': data, 'vtran_data': vtran_data, 'vtran_peaks': vtran_peaks, 'videos': videos, 'peaks': peaks
     })
+    f = open("/tmp/rendering.html", "w")
+    f.write(rendering)
+    f.close()
+    from django.http import HttpResponse
+    return HttpResponse(rendering)
 
 
 # @view(name="prototype_interface")
@@ -154,6 +170,7 @@ def video_single_query(vid):
 
     collection = mongodb['visual_transition']
     vtran_temp_data = list(collection.find({"vid": vid}))
+    # print vtran_temp_data
     vtran_data = vtran_temp_data[0]["visual_diff"]
     # vtran_np_data = np.array(vtran_data)
     # print vtran_data
